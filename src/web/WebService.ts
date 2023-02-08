@@ -2,7 +2,7 @@ import { WebApi } from "../api/web";
 import * as express from "express";
 import { AuthService } from "../users/AuthService";
 import { User, UserRole } from "../users/User";
-import { WebResponses } from "./WebResponses";
+import { ResponseTypes } from "./ResponseTypes";
 
 class WebServiceClass
 {
@@ -18,7 +18,7 @@ class WebServiceClass
         const user = await this.GetUser(req, res);
 
         if (!user || !user.Id) {
-            return WebResponses.NotAuthorized;
+            return ResponseTypes.NotAuthorized;
         }
 
         const r = await User.CheckRole(user.Id, role);

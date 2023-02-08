@@ -1,6 +1,6 @@
 import { Connection } from "../Database";
 import { MIS_DT } from "../util/MIS_DT";
-import { WebResponses } from "../web/WebResponses";
+import { ResponseTypes } from "../web/ResponseTypes";
 
 export enum UserRole {
     Student, Trainer, Administrator
@@ -66,7 +66,7 @@ export class User {
         const user = await this.GetById(userId);
 
         if (!user) {
-            return WebResponses.NoSuchUser;
+            return ResponseTypes.NoSuchUser;
         }
 
         return user.role || UserRole.Student >= role;

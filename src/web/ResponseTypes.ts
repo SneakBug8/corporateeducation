@@ -1,10 +1,13 @@
-export enum WebResponses {
+export enum ResponseTypes {
+    Null = "",
     NotAuthorized = "You are not authorized",
     NoRights = "You don't have rights for this action",
     NoSuchUser = "No such user",
     NoSuchExercise = "No such exercise",
-    NotEligibleForTask = "You are not eligible to do this task",
+    NotEligibleForTask = "You are not eligible to do this task. Reason: ",
     NoSuchRun = "No such run",
+
+    WrongAnswer = "Wrong answer",
 
     PreviousNotDone = "Previous exercises weren't completed",
     NoGroup = "This task is available only to certain groups.",

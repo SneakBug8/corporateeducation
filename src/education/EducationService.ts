@@ -1,7 +1,9 @@
 import { Config } from "../config";
 import { User } from "../users/User";
+import { Check } from "../util/Check";
 import { MIS_DT } from "../util/MIS_DT";
-import { WebResponses } from "../web/WebResponses";
+import { ResponseTypes } from "../web/ResponseTypes";
+import { WebResponse } from "../web/WebResponse";
 import { Exercise } from "./Exercise";
 import { ExerciseRun } from "./ExerciseRun";
 import { ExerciseSchedule } from "./ExerciseSchedule";
@@ -26,10 +28,8 @@ class EducationServiceClass {
         return res * Math.min(1, steps.length * Config.TimePerQuestion / Math.max(time, 1));
     }
 
-    public async GetTask(userId: number, exerciseId: number) {
-        if (!await this.CanDoTask(userId, exerciseId)) {
-            return WebResponses.NotEligibleForTask;
-        }
+    public async GetTaskContent(userId: number, exerciseId: number) {
+        const r = await this.CanDoTask(userId, exerciseId);
 
         let run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
 
@@ -50,37 +50,31 @@ class EducationServiceClass {
         const exercise = await Exercise.GetById(exerciseId);
 
         if (!exercise) {
-            throw new Error(WebResponses.NoSuchExercise);
+            return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
 
         const prevs = await Exercise.GetPreviousIDs(exercise);
 
         if (prevs) {
-
             for (const prev of prevs) {
                 const r = await this.CheckEducationScheduleOnStart(userId, prev);
-                console.log(`User ${userId} can ${r} do task ${prev}`);
+                console.log(`User ${userId} can ${r.Is(true)} do task ${prev}`);
 
                 if (r && !await this.DidFinishTask(userId, prev)) {
-                    return WebResponses.PreviousNotDone;
+                    return new WebResponse(false, ResponseTypes.PreviousNotDone);
                 }
             }
         }
 
         // Does the schedule allow this particular exercise
         const t = await this.CheckEducationScheduleOnStart(userId, exerciseId);
-        console.log(`User ${userId} can ${t} do task ${exerciseId}`);
+        console.log(`User ${userId} can ${t.Is(true)} do task ${exerciseId}`);
 
-        if (t !== true) {
-            return false;
+        if (t.Is(false)) {
+            return t;
         }
 
-        if (!exercise.public) {
-            // Check if the exercise was unlocked to the group
-            return false;
-        }
-
-        return true;
+        return new WebResponse(true);
     }
 
     public async DidFinishTask(userId: number, exerciseId: number) {
@@ -94,9 +88,9 @@ class EducationServiceClass {
     }
 
     public async StartTask(userId: number, exerciseId: number) {
-        if (!await this.CanDoTask(userId, exerciseId)) {
-            throw new Error("You are not eligible to start task");
-        }
+        const r = await this.CanDoTask(userId, exerciseId);
+
+        r.Expect(true);
 
         const run = new ExerciseRun();
         run.exercise = exerciseId;
@@ -108,20 +102,23 @@ class EducationServiceClass {
     }
 
     public async RestartTask(run: ExerciseRun) {
+        console.log(`Task ${run.exercise} of user ${run.user} restarted`);
         run.finished = false;
         run.step = 0;
         await ExerciseRun.Update(run);
     }
 
     public async PassStep(userId: number, exerciseId: number, answer: string = "") {
-        if (!await this.CanDoTask(userId, exerciseId)) {
-            throw new Error("You are not eligible to do this task");
+        const t = await this.CanDoTask(userId, exerciseId);
+
+        if (t.Is(false)) {
+            return t;
         }
 
         const exercise = await Exercise.GetById(exerciseId);
 
         if (!exercise) {
-            throw new Error(WebResponses.NoSuchExercise);
+            return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
 
         let run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
@@ -136,37 +133,41 @@ class EducationServiceClass {
 
         const r = await this.CheckAnswer(userId, exerciseId, run.step, answer);
 
-        if (r) {
-            run.step++;
-
-            const noofsteps = await ExerciseStep.Count(run.exercise);
-
-            if (run.step === noofsteps) {
-                const now = MIS_DT.GetExact();
-                const time = Math.floor(now - run.MIS_DT) / 1000;
-                run.experience = await this.CalculateRunExperience(run.exercise, 0);
-
-                await ExerciseRun.Update(run);
-
-                const t = await this.CheckEducationScheduleOnRunSubmission(userId, exerciseId);
-
-                if (t === true) {
-                    run.finished = true;
-                    await ExerciseRun.Update(run);
-                }
-                else if (t === WebResponses.NotEnoughXp) {
-                    await this.RestartTask(run);
-                    throw new Error(t);
-                }
-                else {
-                    throw new Error(t);
-                }
-            }
-
-            return true;
+        if (!r) {
+            return new WebResponse(false, ResponseTypes.WrongAnswer);
         }
 
-        return false;
+        run.step++;
+
+        console.log(`User ${userId} passed to step ${run.step} in exercise ${exerciseId}`);
+
+        const noofsteps = await ExerciseStep.Count(run.exercise);
+
+        if (run.step === noofsteps) {
+            const now = MIS_DT.GetExact();
+            const time = Math.floor(now - run.MIS_DT) / 1000;
+            run.experience = await this.CalculateRunExperience(run.exercise, 0);
+
+            await ExerciseRun.Update(run);
+
+            const t = await this.CheckEducationScheduleOnRunSubmission(userId, exerciseId);
+
+            if (t.Is(true)) {
+                console.log(`User ${userId} finished exercise ${exerciseId}`);
+                run.finished = true;
+                await ExerciseRun.Update(run);
+            }
+            else if (t.GetReason() === ResponseTypes.NotEnoughXp) {
+                await this.RestartTask(run);
+                return t;
+            }
+            else {
+                return t;
+            }
+        }
+
+        await ExerciseRun.Update(run);
+        return new WebResponse(true);
     }
 
     public async CheckAnswer(userId: number, exerciseId: number, stepno: number, answer: string) {
@@ -236,113 +237,113 @@ class EducationServiceClass {
         const exercise = await Exercise.GetById(exerciseId);
 
         if (!exercise) {
-            throw new Error(WebResponses.NoSuchExercise);
+            return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
 
         // If it is public exercise
         if (exercise.public) {
-            return true;
+            return new WebResponse(true);
         }
 
         const user = await User.GetById(userId);
 
         if (!user) {
-            return WebResponses.NoSuchUser;
+            return new WebResponse(false, ResponseTypes.NoSuchUser);
         }
 
         // If user doesn't belong to a group
         if (!user.group) {
-            return WebResponses.NoGroup;
+            return new WebResponse(false, ResponseTypes.NoGroup);
         }
 
         const run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
         const schedule = await ExerciseSchedule.GetWithExerciseAndGroup(exerciseId, user.group);
 
         if (!schedule) {
-            return WebResponses.TaskNotOpened;
+            return new WebResponse(false, ResponseTypes.TaskNotOpened);
         }
 
         if (!run) {
-            return WebResponses.NoSuchRun;
+            return new WebResponse(false, ResponseTypes.NoSuchRun);
         }
 
         const now = MIS_DT.GetExact();
 
         // If task not started
         if (schedule.startsDt && now < schedule.startsDt) {
-            return WebResponses.TaskNotOpened;
+            return new WebResponse(false, ResponseTypes.TaskNotOpened);
         }
 
         // If task has ended
         if (schedule.endsDt && now > schedule.endsDt) {
-            return WebResponses.TaskEnded;
+            return new WebResponse(false, ResponseTypes.TaskEnded);
         }
 
         // If not enough XP
         if (run.experience || 0 < (schedule.minExp || 0)) {
-            return WebResponses.NotEnoughXp;
+            return new WebResponse(false, ResponseTypes.NotEnoughXp);
         }
 
         // If too much XP
         if (run && (run.experience || 0) > (schedule.maxExp || 0)) {
-            return WebResponses.MoreThanMaxXP;
+            return new WebResponse(false, ResponseTypes.MoreThanMaxXP);
         }
 
-        return true;
+        return new WebResponse(true);
     }
 
-    public async CheckEducationScheduleOnRunSubmission(exerciseId: number, userId: number) {
+    public async CheckEducationScheduleOnRunSubmission(userId: number, exerciseId: number) {
         const exercise = await Exercise.GetById(exerciseId);
 
         if (!exercise) {
-            throw new Error(WebResponses.NoSuchExercise);
+            return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
 
         // If it is public exercise
         if (exercise.public) {
-            return true;
+            return new WebResponse(true);
         }
 
         const user = await User.GetById(userId);
 
         if (!user) {
-            return WebResponses.NoSuchUser;
+            return new WebResponse(false, ResponseTypes.NoSuchUser);
         }
 
         // If user doesn't belong to a group
         if (!user.group) {
-            return WebResponses.NoGroup;
+            return new WebResponse(false, ResponseTypes.NoGroup);
         }
 
         const run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
         const schedule = await ExerciseSchedule.GetWithExerciseAndGroup(exerciseId, user.group);
 
         if (!schedule) {
-            return WebResponses.TaskNotOpened;
+            return new WebResponse(false, ResponseTypes.TaskNotOpened);
         }
 
         if (!run) {
-            return WebResponses.NoSuchRun;
+            return new WebResponse(false, ResponseTypes.NoSuchRun);
         }
 
         const now = MIS_DT.GetExact();
 
         // If task not started
         if (schedule.startsDt && now < schedule.startsDt) {
-            return WebResponses.TaskNotStarted;
+            return new WebResponse(false, ResponseTypes.TaskNotStarted);
         }
 
         // If task has ended
         if (schedule.endsDt && now > schedule.endsDt) {
-            return WebResponses.TaskEnded;
+            return new WebResponse(false, ResponseTypes.TaskEnded);
         }
 
         // If not enough XP
         if (run.experience || 0 < (schedule.minExp || 0)) {
-            return WebResponses.NotEnoughXp;
+            return new WebResponse(false, ResponseTypes.NotEnoughXp);
         }
 
-        return true;
+        return new WebResponse(true);
     }
 }
 
