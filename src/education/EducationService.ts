@@ -14,28 +14,21 @@ class EducationServiceClass {
     public Init() {
     }
 
-    public async CalculateRunExperience(exerciseId: number, time: number) {
-        let res = 0;
+    public async AdjustExperienceToTime(exerciseId: number, experience: number, time: number) {
         const steps = await ExerciseStep.GetWithExercise(exerciseId);
-        for (const step of steps) {
-            if (step.type === "input") {
-                continue;
-            }
-            res += step.experience;
-        }
 
         // 60 seconds per step or else drop experience
-        return res * Math.min(1, steps.length * Config.TimePerQuestion / Math.max(time, 1));
+        return Math.round(experience * Math.min(1, steps.length * Config.TimePerQuestion / Math.max(time, 1)));
     }
 
     public async GetTaskContent(userId: number, exerciseId: number) {
-        const r = await this.CanDoTask(userId, exerciseId);
+        const t = await this.CanDoTask(userId, exerciseId);
 
-        let run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
-
-        if (!run) {
-            run = await this.StartTask(userId, exerciseId);
+        if (t.Is(false)) {
+            return t;
         }
+
+        const run = await this.EnsureRun(userId, exerciseId);
 
         const step = await ExerciseStep.GetWithExerciseAndNumber(exerciseId, run.step);
 
@@ -58,7 +51,7 @@ class EducationServiceClass {
         if (prevs) {
             for (const prev of prevs) {
                 const r = await this.CheckEducationScheduleOnStart(userId, prev);
-                console.log(`User ${userId} can ${r.Is(true)} do task ${prev}`);
+                // console.log(`User ${userId} can ${r.Is(true)} do task ${prev}`);
 
                 if (r && !await this.DidFinishTask(userId, prev)) {
                     return new WebResponse(false, ResponseTypes.PreviousNotDone);
@@ -68,26 +61,36 @@ class EducationServiceClass {
 
         // Does the schedule allow this particular exercise
         const t = await this.CheckEducationScheduleOnStart(userId, exerciseId);
-        console.log(`User ${userId} can ${t.Is(true)} do task ${exerciseId}`);
+        // console.log(`User ${userId} can ${t.Is(true)} do task ${exerciseId}`);
 
         if (t.Is(false)) {
             return t;
         }
 
-        return new WebResponse(true);
+        return new WebResponse(true, ResponseTypes.OK);
     }
 
     public async DidFinishTask(userId: number, exerciseId: number) {
         const run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
 
-        if (!run) {
-            return false;
-        }
-
-        return run.finished;
+        console.log(`User ${userId} finished exercise ${exerciseId}: ${run && run.finished}`);
+        return run && run.finished;
     }
 
-    public async StartTask(userId: number, exerciseId: number) {
+    private async EnsureRun(userId: number, exerciseId: number) {
+        let run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
+
+        if (!run) {
+            run = await this.StartTask(userId, exerciseId);
+        }
+
+        if (run.finished) {
+            run = await this.RestartTask(run);
+        }
+        return run;
+    }
+
+    private async StartTask(userId: number, exerciseId: number) {
         const r = await this.CanDoTask(userId, exerciseId);
 
         r.Expect(true);
@@ -101,11 +104,13 @@ class EducationServiceClass {
         return run;
     }
 
-    public async RestartTask(run: ExerciseRun) {
+    private async RestartTask(run: ExerciseRun) {
         console.log(`Task ${run.exercise} of user ${run.user} restarted`);
         run.finished = false;
         run.step = 0;
+        run.experience = 0;
         await ExerciseRun.Update(run);
+        return run;
     }
 
     public async PassStep(userId: number, exerciseId: number, answer: string = "") {
@@ -121,53 +126,63 @@ class EducationServiceClass {
             return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
 
-        let run = await ExerciseRun.GetWithUserAndExercise(userId, exerciseId);
+        const run = await this.EnsureRun(userId, exerciseId);
 
-        if (!run) {
-            run = await this.StartTask(userId, exerciseId);
-        }
+        // The step we just finished
+        const prevstep = await ExerciseStep.GetWithExerciseAndNumber(exerciseId, run.step);
 
-        if (run.finished) {
-            await this.RestartTask(run);
+        if (!prevstep) {
+            throw new WebResponse(false, ResponseTypes.NoSuchStep);
         }
 
         const r = await this.CheckAnswer(userId, exerciseId, run.step, answer);
 
-        if (!r) {
-            return new WebResponse(false, ResponseTypes.WrongAnswer);
+        if (r.Is(false)) {
+            // Wrong answer - no XP added
+            run.experience = (run.experience || 0) + 0;
+            run.step++;
+        }
+        else {
+            // Set next step
+            run.step++;
+            run.experience = (run.experience || 0) + prevstep.experience;
         }
 
-        run.step++;
-
-        console.log(`User ${userId} passed to step ${run.step} in exercise ${exerciseId}`);
+        console.log(`User ${userId} passed to step ${run.step} in exercise ${exerciseId}. Current experience: ${run.experience}`);
+        await ExerciseRun.Update(run);
 
         const noofsteps = await ExerciseStep.Count(run.exercise);
-
+        // steps numbered from zero: 0, 1. no of steps = 2, when step ind == 2, we have done all steps
         if (run.step === noofsteps) {
-            const now = MIS_DT.GetExact();
-            const time = Math.floor(now - run.MIS_DT) / 1000;
-            run.experience = await this.CalculateRunExperience(run.exercise, 0);
-
-            await ExerciseRun.Update(run);
-
-            const t = await this.CheckEducationScheduleOnRunSubmission(userId, exerciseId);
-
-            if (t.Is(true)) {
-                console.log(`User ${userId} finished exercise ${exerciseId}`);
-                run.finished = true;
-                await ExerciseRun.Update(run);
-            }
-            else if (t.GetReason() === ResponseTypes.NotEnoughXp) {
-                await this.RestartTask(run);
-                return t;
-            }
-            else {
-                return t;
-            }
+            const r1 = await this.FinalizeTask(run);
+            return r1;
         }
 
+        return r;
+    }
+
+    private async FinalizeTask(run: ExerciseRun) {
+        const now = MIS_DT.GetExact();
+        const time = Math.floor(now - run.MIS_DT) / 1000;
+        run.experience = await this.AdjustExperienceToTime(run.exercise, run.experience || 0, time);
+
         await ExerciseRun.Update(run);
-        return new WebResponse(true);
+
+        const t = await this.CheckEducationScheduleOnRunSubmission(run.user, run.exercise);
+
+        if (t.Is(true)) {
+            console.log(`User ${run.user} finished exercise ${run.exercise}`);
+            run.finished = true;
+            await ExerciseRun.Update(run);
+            return new WebResponse(true, ResponseTypes.ExcerciseFinished);
+        }
+        else if (t.GetReason() === ResponseTypes.NotEnoughXp) {
+            await this.RestartTask(run);
+            return t;
+        }
+        else {
+            return t;
+        }
     }
 
     public async CheckAnswer(userId: number, exerciseId: number, stepno: number, answer: string) {
@@ -183,13 +198,18 @@ class EducationServiceClass {
         }
 
         if (step.type === "text") {
-            return true;
+            return new WebResponse(true, ResponseTypes.AutoPass);
         }
         if (step.type === "video") {
-            return true;
+            return new WebResponse(true, ResponseTypes.AutoPass);
         }
         if (step.type === "quiz") {
-            return step.answer === answer;
+            if (step.answer === answer) {
+                return new WebResponse(true, ResponseTypes.CorrectAnswer);
+            }
+            else {
+                return new WebResponse(false, ResponseTypes.WrongAnswer);
+            }
         }
         if (step.type === "input") {
             // Add storing of an answer for the future
@@ -198,9 +218,10 @@ class EducationServiceClass {
             answer.step = stepno;
             answer.user = userId;
             await UserAnswer.Insert(answer);
-            return true;
+            return new WebResponse(true, ResponseTypes.CollectedAnswer);
         }
-        return false;
+
+        throw new Error("Not valid step type");
     }
 
     public async TotalExperience(userId: number) {
@@ -242,7 +263,7 @@ class EducationServiceClass {
 
         // If it is public exercise
         if (exercise.public) {
-            return new WebResponse(true);
+            return new WebResponse(true, ResponseTypes.OK);
         }
 
         const user = await User.GetById(userId);
@@ -263,8 +284,8 @@ class EducationServiceClass {
             return new WebResponse(false, ResponseTypes.TaskNotOpened);
         }
 
-        if (!run) {
-            return new WebResponse(false, ResponseTypes.NoSuchRun);
+        if (run && (run.experience || 0) > (schedule.maxExp || 0)) {
+            return new WebResponse(false, ResponseTypes.MoreThanMaxXP);
         }
 
         const now = MIS_DT.GetExact();
@@ -279,17 +300,7 @@ class EducationServiceClass {
             return new WebResponse(false, ResponseTypes.TaskEnded);
         }
 
-        // If not enough XP
-        if (run.experience || 0 < (schedule.minExp || 0)) {
-            return new WebResponse(false, ResponseTypes.NotEnoughXp);
-        }
-
-        // If too much XP
-        if (run && (run.experience || 0) > (schedule.maxExp || 0)) {
-            return new WebResponse(false, ResponseTypes.MoreThanMaxXP);
-        }
-
-        return new WebResponse(true);
+        return new WebResponse(true, ResponseTypes.OK);
     }
 
     public async CheckEducationScheduleOnRunSubmission(userId: number, exerciseId: number) {
@@ -301,7 +312,7 @@ class EducationServiceClass {
 
         // If it is public exercise
         if (exercise.public) {
-            return new WebResponse(true);
+            return new WebResponse(true, ResponseTypes.OK);
         }
 
         const user = await User.GetById(userId);
@@ -339,11 +350,11 @@ class EducationServiceClass {
         }
 
         // If not enough XP
-        if (run.experience || 0 < (schedule.minExp || 0)) {
+        if ((run.experience || 0) < (schedule.minExp || 0)) {
             return new WebResponse(false, ResponseTypes.NotEnoughXp);
         }
 
-        return new WebResponse(true);
+        return new WebResponse(true, ResponseTypes.OK);
     }
 }
 

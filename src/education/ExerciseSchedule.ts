@@ -60,6 +60,10 @@ export class ExerciseSchedule {
         step.UPDATED_DT = MIS_DT.GetExact();
         await ExerciseSchedulesRepository().where("Id", step.Id).update(step);
     }
+
+    public static async Delete(step: ExerciseSchedule) {
+        await ExerciseSchedulesRepository().where("Id", step.Id).delete();
+    }
 }
 
 export const ExerciseSchedulesRepository = () => Connection<ExerciseSchedule>("ExerciseSchedules");

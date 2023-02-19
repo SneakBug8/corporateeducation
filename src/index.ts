@@ -2,21 +2,14 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import TelegramBot = require("node-telegram-bot-api");
-import { Logger } from "./notes/logger";
 import { BotAPI } from "./api/bot";
 import { MessageWrapper } from "./MessageWrapper";
 import { AuthService } from "./users/AuthService";
-import { InitNotes, LogNote, ProcessNotes } from "./notes/NotesController";
-import { Networking } from "./networking/Networking";
 import { Config } from "./config";
-import { InitProjects, ProcessProjects, ProjectsCycle } from "./projects/Projects";
 import { BackupCycle, InitBackup, ProcessBackup } from "./backup/BackupService";
 import { Sleep } from "./util/Sleep";
-import { ProjectsStatsExporter } from "./projects/ProjectsStatsExporter";
-import { NetworkingWeb } from "./networking/NetworkingWeb";
 import { Scheduler } from "./util/Scheduler";
 import { ErrorLogger } from "./util/ErrorLogger";
-import { NotesWeb } from "./notes/NotesWeb";
 import * as EventEmitter from "events";
 import { SyncEvent } from "./util/SyncEvent";
 import { ConsoleWebService } from "./console/ConsoleWebService";
@@ -94,7 +87,6 @@ class App
     {
         const listeners = [
             Scheduler.Interval.bind(Scheduler),
-            ProjectsCycle,
             BackupCycle,
         ];
 
@@ -171,9 +163,6 @@ class App
             }
 
             const listeners = [
-                Networking.Process.bind(Networking),
-                ProcessNotes,
-                ProcessProjects,
                 ProcessBackup,
             ];
 
@@ -189,12 +178,7 @@ class App
                 return;
             }
 
-            if (process.env.notesenabled === "yes" && !message.checkRegex(/^\/.*$/)) {
-                await LogNote(message);
-            }
-            else {
                 message.reply("Unknown command");
-            }
         }
         catch (e) {
             Server.SendMessage(e + "");

@@ -7,7 +7,7 @@ export class WebResponse {
 
     public history = new Array<ResponseTypes>();
 
-    public constructor(ok: boolean, reason: ResponseTypes = ResponseTypes.Null) {
+    public constructor(ok: boolean, reason: ResponseTypes) {
         this.ok = ok;
         this.reason = reason;
 
