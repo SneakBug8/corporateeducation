@@ -22,6 +22,9 @@ export class ResponseTypes {
     public static TaskNotStarted = makeResponseType(15, "This task wasn't opened by the trainer");
     public static MoreThanMaxXP = makeResponseType(16, "You are not allowed to repeat this task as you've passed the threshold");
     public static NotEnoughXp = makeResponseType(17, "You didn't get enough XP to pass this task");
+
+    public static NoSuchLeague = makeResponseType(21, "No such league");
+
 }
 
 function makeResponseType(id: number, text: string) {

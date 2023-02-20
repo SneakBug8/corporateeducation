@@ -6,10 +6,8 @@ import { Config } from "../config";
 const backuppath = path.resolve(Config.dataPath(), "../backup.zip");
 
 import { Server, setWaitingForValue } from "..";
-import TelegramBot = require("node-telegram-bot-api");
 import { BackupData } from "./BackupData";
 import { MessageWrapper } from "../MessageWrapper";
-import { BotAPI } from "../api/bot";
 import { Sleep } from "../util/Sleep";
 import { IntervalsExecution } from "../util/IntervalsExecution";
 import { Scheduler } from "../util/Scheduler";
@@ -69,9 +67,9 @@ async function CreateBackup()
 
   await Sleep(1000);
 
-  BotAPI.sendDocument(Config.DefaultChat, fs.createReadStream(backuppath), {
+  /* BotAPI.sendDocument(Config.DefaultChat, fs.createReadStream(backuppath), {
     disable_notification: true
-  });
+  }); */
 
   // Server.SendMessage("Created backup");
 
@@ -97,7 +95,6 @@ async function MakeBackupArchive()
 
   // append files from a directories into the archive
   archive.directory(Config.dataPath(), "data");
-  archive.directory(path.resolve(Config.dataPath(), "../diary"), "diary");
 
   await archive.finalize();
 }

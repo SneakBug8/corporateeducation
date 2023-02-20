@@ -9,8 +9,12 @@ import { ExerciseRun } from "./ExerciseRun";
 import { ExerciseSchedule } from "./ExerciseSchedule";
 import { ExerciseStep } from "./ExerciseStep";
 import { UserAnswer } from "./UserAnswer";
+import { EventEmitter } from "events";
 
-class EducationServiceClass {
+class EducationServiceClass extends EventEmitter {
+
+    public gainXpEvent = "gainxp";
+
     public Init() {
     }
 
@@ -151,7 +155,7 @@ class EducationServiceClass {
         console.log(`User ${userId} passed to step ${run.step} in exercise ${exerciseId}. Current experience: ${run.experience}`);
         await ExerciseRun.Update(run);
 
-        const noofsteps = await ExerciseStep.Count(run.exercise);
+        const noofsteps = await ExerciseStep.CountWithExercise(run.exercise);
         // steps numbered from zero: 0, 1. no of steps = 2, when step ind == 2, we have done all steps
         if (run.step === noofsteps) {
             const r1 = await this.FinalizeTask(run);
@@ -173,6 +177,7 @@ class EducationServiceClass {
         if (t.Is(true)) {
             console.log(`User ${run.user} finished exercise ${run.exercise}`);
             run.finished = true;
+            run.FINISHED_DT = MIS_DT.GetExact();
             await ExerciseRun.Update(run);
             return new WebResponse(true, ResponseTypes.ExcerciseFinished);
         }
@@ -185,7 +190,7 @@ class EducationServiceClass {
         }
     }
 
-    public async CheckAnswer(userId: number, exerciseId: number, stepno: number, answer: string) {
+    private async CheckAnswer(userId: number, exerciseId: number, stepno: number, answer: string) {
         const exercise = await Exercise.GetById(exerciseId);
         const step = await ExerciseStep.GetWithExerciseAndNumber(exerciseId, stepno);
 
@@ -254,7 +259,7 @@ class EducationServiceClass {
         await UserAnswer.Update(answer);
     }
 
-    public async CheckEducationScheduleOnStart(userId: number, exerciseId: number) {
+    private async CheckEducationScheduleOnStart(userId: number, exerciseId: number) {
         const exercise = await Exercise.GetById(exerciseId);
 
         if (!exercise) {
@@ -303,7 +308,7 @@ class EducationServiceClass {
         return new WebResponse(true, ResponseTypes.OK);
     }
 
-    public async CheckEducationScheduleOnRunSubmission(userId: number, exerciseId: number) {
+    private async CheckEducationScheduleOnRunSubmission(userId: number, exerciseId: number) {
         const exercise = await Exercise.GetById(exerciseId);
 
         if (!exercise) {

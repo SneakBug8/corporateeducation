@@ -17,11 +17,11 @@ class WebServiceClass
     {
         const user = await this.GetUser(req, res);
 
-        if (!user || !user.Id) {
+        if (!user || !user.id) {
             return ResponseTypes.NotAuthorized;
         }
 
-        const r = await User.CheckRole(user.Id, role);
+        const r = await User.CheckRole(user.id, role);
 
         return r;
     }

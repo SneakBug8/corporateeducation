@@ -1,4 +1,5 @@
 import { Config } from "../config";
+import { MIS_DT } from "../util/MIS_DT";
 import { User } from "./User";
 
 class AuthServiceClass {
@@ -44,6 +45,8 @@ class AuthServiceClass {
         }
 
         if (pswd === user.password) {
+            user.AUTHORIZED_DT = MIS_DT.GetExact();
+            User.Update(user);
             return true;
         }
         return false;

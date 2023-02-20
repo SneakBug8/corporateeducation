@@ -1,13 +1,13 @@
 import { Connection } from "../Database";
 import { MIS_DT } from "../util/MIS_DT";
 export class Group {
-    public Id: undefined | number;
+    public id: undefined | number;
     public name: string | undefined;
     public MIS_DT = MIS_DT.GetExact();
     public UPDATED_DT = MIS_DT.GetExact();
 
     public static async GetById(id: number) {
-        const entries = await GroupsRepository().where("Id", "LIKE", `%${id}%`).select();
+        const entries = await GroupsRepository().where("id", "LIKE", `%${id}%`).select();
 
         if (entries.length) {
             return entries[0];
@@ -35,7 +35,7 @@ export class Group {
 
     public static async Update(group: Group) {
         group.UPDATED_DT = MIS_DT.GetExact();
-        await GroupsRepository().where("Id", group.Id).update(group);
+        await GroupsRepository().where("id", group.id).update(group);
     }
 }
 

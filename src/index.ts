@@ -1,33 +1,31 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import TelegramBot = require("node-telegram-bot-api");
-import { BotAPI } from "./api/bot";
-import { MessageWrapper } from "./MessageWrapper";
-import { AuthService } from "./users/AuthService";
+// import { BotAPI } from "./api/bot";
 import { Config } from "./config";
 import { BackupCycle, InitBackup, ProcessBackup } from "./backup/BackupService";
 import { Sleep } from "./util/Sleep";
 import { Scheduler } from "./util/Scheduler";
 import { ErrorLogger } from "./util/ErrorLogger";
-import * as EventEmitter from "events";
 import { SyncEvent } from "./util/SyncEvent";
-import { ConsoleWebService } from "./console/ConsoleWebService";
-import { Runner } from "mocha";
+import { MessageWrapper } from "./MessageWrapper";
+
+
+import { EducationWebService } from "./education/EducationWebService";
+
 
 let waitingCallback: ((message: MessageWrapper) => any) | null = null;
 
-export function setWaitingForValue(message: string, callback: (message: MessageWrapper) => any)
-{
-    Server.SendMessage(message, [[{ text: "/exit" }]]);
+
+export function setWaitingForValue(message: string, callback: (message: MessageWrapper) => any) {
+    // Server.SendMessage(message, [[{ text: "/exit" }]]);
     waitingCallback = callback;
 }
 
-export function setWaitingForValuePure(callback: (message: MessageWrapper) => any)
-{
+export function setWaitingForValuePure(callback: (message: MessageWrapper) => any) {
     waitingCallback = callback;
 }
-
+/*
 export function defaultKeyboard(): TelegramBot.KeyboardButton[][]
 {
     return [
@@ -48,25 +46,25 @@ export function extraKeyboard(): TelegramBot.KeyboardButton[][]
         [{ text: "/exit" }],
     ];
 }
+*/
 
-class App
-{
-    private bot: TelegramBot;
+class App {
+    // private bot: TelegramBot;
     private readingMessage: boolean = false;
     public loaded = false;
 
     public MessageEvent = new SyncEvent();
     public IntervalEvent = new SyncEvent();
 
-    public async WaitForLoad()
-    {
+    public async WaitForLoad() {
         while (!this.loaded) {
             await Sleep(500);
         }
     }
 
-    public constructor()
-    {
+    public constructor() {
+        /*
+
         this.bot = BotAPI;
 
         this.bot.on("text", async (msg) =>
@@ -80,13 +78,14 @@ class App
 
         });
 
+*/
+        EducationWebService.Init();
         setInterval(this.Intervals.bind(this), 15 * 60 * 1000);
     }
 
-    public async Intervals()
-    {
+    public async Intervals() {
         const listeners = [
-            Scheduler.Interval.bind(Scheduler),
+            // Scheduler.Interval.bind(Scheduler),
             BackupCycle,
         ];
 
@@ -101,7 +100,7 @@ class App
 
         this.IntervalEvent.Emit();
     }
-
+    /*
     private async messageHandler(msg: TelegramBot.Message)
     {
         try {
@@ -207,19 +206,19 @@ class App
             });
             return new MessageWrapper(msg);
         }
-    }
+    }*/
 }
 
 export const Server = new App();
 
 console.log("Bot started");
-async function a()
-{
+async function a() {
     console.log(`Server ip ${await Config.ip()}`);
 }
 a();
 
+/*
 if (!Config.isTest() && !Config.isDev()) {
     Server.SendMessage("Bot restarted");
-}
+}*/
 Server.loaded = true;

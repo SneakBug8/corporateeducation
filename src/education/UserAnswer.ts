@@ -1,7 +1,7 @@
 import { Connection } from "../Database";
 import { MIS_DT } from "../util/MIS_DT";
 export class UserAnswer {
-    public Id: number | undefined;
+    public id: number | undefined;
     public user: number = 0;
     public exercise: number = 0;
     public experience: number | undefined = 0;
@@ -11,7 +11,7 @@ export class UserAnswer {
     public UPDATED_DT = MIS_DT.GetExact();
 
     public static async GetById(id: number) {
-        const entries = await AnswersRepository().where("Id", "LIKE", `%${id}%`).select();
+        const entries = await AnswersRepository().where("id", "LIKE", `%${id}%`).select();
 
         if (entries.length) {
             return entries[0];
@@ -61,7 +61,7 @@ export class UserAnswer {
 
     public static async Update(run: UserAnswer) {
         run.UPDATED_DT = MIS_DT.GetExact();
-        await AnswersRepository().where("Id", run.Id).update(run);
+        await AnswersRepository().where("id", run.id).update(run);
     }
 }
 

@@ -1,7 +1,7 @@
 import { Connection } from "../Database";
 import { MIS_DT } from "../util/MIS_DT";
 export class ExerciseSchedule {
-    public Id: undefined | number;
+    public id: undefined | number;
     public groupId: number | undefined;
     public exerciseId: number | undefined;
     public startsDt: number | undefined;
@@ -13,7 +13,7 @@ export class ExerciseSchedule {
     public UPDATED_DT = MIS_DT.GetExact();
 
     public static async GetById(id: number) {
-        const entries = await ExerciseSchedulesRepository().where("Id", "LIKE", `%${id}%`).select();
+        const entries = await ExerciseSchedulesRepository().where("id", "LIKE", `%${id}%`).select();
 
         if (entries.length) {
             return entries[0];
@@ -36,7 +36,7 @@ export class ExerciseSchedule {
 
     public static async Count(exercise: number): Promise<number> {
         const data = await ExerciseSchedulesRepository()
-            .where("exerciseId", "LIKE", `%${exercise}%`).count("Id as c").first() as any;
+            .where("exerciseId", "LIKE", `%${exercise}%`).count("id as c").first() as any;
 
         if (data) {
             return data.c;
@@ -58,11 +58,11 @@ export class ExerciseSchedule {
 
     public static async Update(step: ExerciseSchedule) {
         step.UPDATED_DT = MIS_DT.GetExact();
-        await ExerciseSchedulesRepository().where("Id", step.Id).update(step);
+        await ExerciseSchedulesRepository().where("id", step.id).update(step);
     }
 
     public static async Delete(step: ExerciseSchedule) {
-        await ExerciseSchedulesRepository().where("Id", step.Id).delete();
+        await ExerciseSchedulesRepository().where("id", step.id).delete();
     }
 }
 

@@ -10,6 +10,7 @@ import { User } from "../../users/User";
 import { Check } from "../../util/Check";
 import { MIS_DT } from "../../util/MIS_DT";
 import { Sleep } from "../../util/Sleep";
+import { WebResponse } from "../../web/WebResponse";
 
 async function interact(descr: string, fun: () => any) {
     const r = await fun();
@@ -281,9 +282,10 @@ describe("ExerciseSchedule", () => {
     });
 
     it("User can't restart a task with too much xp", async () => {
-
+        const r = await interact("CanDoTask", () => EducationService.CanDoTask(testuser, lockedexercise));
+        assert.ok(r.Is(false), "Task shouldn't be restartable");
     });
     it("User can't restart a task with too many tries", async () => {
-
+        // TODO
     });
 });

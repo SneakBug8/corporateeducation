@@ -1,7 +1,8 @@
+import { ConvertAdminQuery } from "../api/AdminQuery";
 import { Connection } from "../Database";
 import { MIS_DT } from "../util/MIS_DT";
 export class ExerciseStep {
-    public Id: undefined | number;
+    public id: undefined | number;
     public exercise: number = 0;
     public stepnumber: number = 0;
     public type: string | undefined;
@@ -12,7 +13,7 @@ export class ExerciseStep {
     public UPDATED_DT = MIS_DT.GetExact();
 
     public static async GetById(id: number) {
-        const entries = await ExerciseStepsRepository().where("Id", "LIKE", `%${id}%`).select();
+        const entries = await ExerciseStepsRepository().where("id", "LIKE", `%${id}%`).select();
 
         if (entries.length) {
             return entries[0];
@@ -23,17 +24,6 @@ export class ExerciseStep {
         const entries = await ExerciseStepsRepository().where("exercise", "LIKE", `%${exercise}%`).select();
 
         return entries;
-    }
-
-    public static async Count(exercise: number): Promise<number> {
-        const data = await ExerciseStepsRepository()
-            .where("exercise", "LIKE", `%${exercise}%`).count("Id as c").first() as any;
-
-        if (data) {
-            return data.c;
-        }
-
-        return 0;
     }
 
     public static async GetWithExerciseAndNumber(exercise: number, step: number) {
@@ -58,7 +48,36 @@ export class ExerciseStep {
 
     public static async Update(step: ExerciseStep) {
         step.UPDATED_DT = MIS_DT.GetExact();
-        await ExerciseStepsRepository().where("Id", step.Id).update(step);
+        await ExerciseStepsRepository().where("id", step.id).update(step);
+    }
+
+    public static async Delete(id: number) {
+        await ExerciseStepsRepository().delete().where("id", id);
+    }
+
+    public static async GetMany(query: any) {
+        const data = await ConvertAdminQuery(query, ExerciseStepsRepository().select());
+        return data;
+    }
+
+    public static async Count(): Promise<number> {
+        const data = await ExerciseStepsRepository().count("id as c").first() as any;
+
+        if (data) {
+            return data.c;
+        }
+
+        return 0;
+    }
+
+    public static async CountWithExercise(exercise: number): Promise<number> {
+        const data = await ExerciseStepsRepository().where("exercise", exercise).count("id as c").first() as any;
+
+        if (data) {
+            return data.c;
+        }
+
+        return 0;
     }
 }
 
