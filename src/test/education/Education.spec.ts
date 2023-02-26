@@ -1,11 +1,13 @@
 import * as assert from "assert";
 import "mocha";
 import { Config } from "../../config";
+import { ExerciseController } from "../../education/controllers/ExerciseController";
+import { ExerciseRunController } from "../../education/controllers/ExerciseRunController";
+import { ExerciseScheduleController } from "../../education/controllers/ExerciseScheduleController";
+import { UserAnswerController } from "../../education/controllers/UserAnswerController";
 import { EducationService } from "../../education/EducationService";
-import { Exercise } from "../../education/Exercise";
-import { ExerciseRun } from "../../education/ExerciseRun";
-import { ExerciseSchedule } from "../../education/ExerciseSchedule";
-import { UserAnswer } from "../../education/UserAnswer";
+import { Exercise } from "../../education/entities/Exercise";
+import { ExerciseSchedule } from "../../education/entities/ExerciseSchedule";
 import { User } from "../../users/User";
 import { Check } from "../../util/Check";
 import { MIS_DT } from "../../util/MIS_DT";
@@ -20,17 +22,17 @@ async function interact(descr: string, fun: () => any) {
 
 describe("Exercises", () => {
     it("GetExercisesDummy", async () => {
-        await Exercise.GetAll();
+        await ExerciseController.GetAll();
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetExerciseDummy", async () => {
-        await Exercise.GetById(0);
+        await ExerciseController.GetById(0);
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetExerciseByNameDummy", async () => {
-        await Exercise.GetByName("");
+        await ExerciseController.GetByName("");
         // assert.ok(1 > 0, "Traded goods")
     });
 });
@@ -38,22 +40,22 @@ describe("Exercises", () => {
 
 describe("Runs", () => {
     it("GetRunsDummy", async () => {
-        await ExerciseRun.GetAll();
+        await ExerciseRunController.GetAll();
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetRun", async () => {
-        await ExerciseRun.GetById(0);
+        await ExerciseRunController.GetById(0);
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetExerciseWithUser", async () => {
-        await ExerciseRun.GetWithUser(0);
+        await ExerciseRunController.GetWithUser(0);
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetExerciseWithExercise", async () => {
-        await ExerciseRun.GetWithExercise(0);
+        await ExerciseRunController.GetWithExercise(0);
         // assert.ok(1 > 0, "Traded goods")
     });
 });
@@ -143,7 +145,7 @@ describe("CheckExercise", () => {
     });
 
     it("InputStepAnswerPresent", async () => {
-        const r1 = await UserAnswer.GetWithUserAndExercise(testuser, exerciseid);
+        const r1 = await UserAnswerController.GetWithUserAndExercise(testuser, exerciseid);
         assert.ok(r1, "User input should be available");
     });
 
@@ -176,20 +178,20 @@ describe("ExerciseSchedule", () => {
         await User.Update(user);
     });
     it("User can't do a task with no schedule", async () => {
-        const s = await ExerciseSchedule.GetWithExerciseAndGroup(lockedexercise, testgroup);
+        const s = await ExerciseScheduleController.GetWithExerciseAndGroup(lockedexercise, testgroup);
 
         if (s) {
-            await ExerciseSchedule.Delete(s);
+            await ExerciseScheduleController.Delete(s);
         }
 
         const r1 = await EducationService.CanDoTask(testuser, lockedexercise);
         assert.ok(r1.Is(false), "Task should be unavailable");
     });
     it("Create a schedule", async () => {
-        const s = await ExerciseSchedule.GetWithExerciseAndGroup(lockedexercise, testgroup);
+        const s = await ExerciseScheduleController.GetWithExerciseAndGroup(lockedexercise, testgroup);
 
         if (s) {
-            await ExerciseSchedule.Delete(s);
+            await ExerciseScheduleController.Delete(s);
         }
         const schedule = new ExerciseSchedule();
         schedule.groupId = testgroup;
@@ -199,10 +201,10 @@ describe("ExerciseSchedule", () => {
         schedule.minExp = 9;
         schedule.maxExp = 9;
 
-        await ExerciseSchedule.Insert(schedule);
+        await ExerciseScheduleController.Insert(schedule);
     });
     it("Set maxdt smaller curdt", async () => {
-        const schedule = await ExerciseSchedule.GetWithExerciseAndGroup(lockedexercise, testgroup);
+        const schedule = await ExerciseScheduleController.GetWithExerciseAndGroup(lockedexercise, testgroup);
 
         if (!schedule) {
             throw Error("No such schedule");
@@ -210,13 +212,13 @@ describe("ExerciseSchedule", () => {
 
         schedule.endsDt = MIS_DT.GetExact() - MIS_DT.OneDay() * 30;
 
-        await ExerciseSchedule.Update(schedule);
+        await ExerciseScheduleController.Update(schedule);
 
         const r1 = await EducationService.CanDoTask(testuser, lockedexercise);
         assert.ok(r1.Is(false), "Task should be unavailable");
     });
     it("Set mindt bigger curdt", async () => {
-        const schedule = await ExerciseSchedule.GetWithExerciseAndGroup(lockedexercise, testgroup);
+        const schedule = await ExerciseScheduleController.GetWithExerciseAndGroup(lockedexercise, testgroup);
 
         if (!schedule) {
             throw Error("No such schedule");
@@ -225,13 +227,13 @@ describe("ExerciseSchedule", () => {
         schedule.endsDt = MIS_DT.GetExact() + MIS_DT.OneDay() * 30;
         schedule.startsDt = MIS_DT.GetExact() + MIS_DT.OneDay() * 30;
 
-        await ExerciseSchedule.Update(schedule);
+        await ExerciseScheduleController.Update(schedule);
 
         const r1 = await EducationService.CanDoTask(testuser, lockedexercise);
         assert.ok(r1.Is(false), "Task should be unavailable");
     });
     it("User can do a task with proper Schedule", async () => {
-        const schedule = await ExerciseSchedule.GetWithExerciseAndGroup(lockedexercise, testgroup);
+        const schedule = await ExerciseScheduleController.GetWithExerciseAndGroup(lockedexercise, testgroup);
 
         if (!schedule) {
             throw Error("No such schedule");
@@ -240,7 +242,7 @@ describe("ExerciseSchedule", () => {
         schedule.endsDt = MIS_DT.GetExact() + MIS_DT.OneDay() * 30;
         schedule.startsDt = MIS_DT.GetExact() - MIS_DT.OneDay() * 30;
 
-        await ExerciseSchedule.Update(schedule);
+        await ExerciseScheduleController.Update(schedule);
 
         const r1 = await EducationService.CanDoTask(testuser, lockedexercise);
         assert.ok(r1.Is(true), "Task should be available");

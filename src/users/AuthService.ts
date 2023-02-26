@@ -1,6 +1,6 @@
 import { Config } from "../config";
 import { MIS_DT } from "../util/MIS_DT";
-import { User } from "./User";
+import { UserController } from "./controllers/UserController";
 
 class AuthServiceClass {
     public chatId: number | undefined;
@@ -8,7 +8,7 @@ class AuthServiceClass {
     public AuthenticatedTokens = new Map<string, string>();
 
     public CreateToken(login: string) {
-        if (!User.HasByLogin(login)) {
+        if (!UserController.HasByLogin(login)) {
             throw new Error("No such User to create token");
         }
 
@@ -28,7 +28,7 @@ class AuthServiceClass {
 
         const login = this.AuthenticatedTokens.get(token) as string;
 
-        const user = await User.GetByLogin(login);
+        const user = await UserController.GetByLogin(login);
 
         if (!user) {
             return null;
@@ -38,7 +38,7 @@ class AuthServiceClass {
     }
 
     public async TryAuthWeb(login: string, pswd: string): Promise<boolean> {
-        const user = await User.GetByLogin(login);
+        const user = await UserController.GetByLogin(login);
 
         if (!user) {
             return false;
@@ -46,7 +46,7 @@ class AuthServiceClass {
 
         if (pswd === user.password) {
             user.AUTHORIZED_DT = MIS_DT.GetExact();
-            User.Update(user);
+            UserController.Update(user);
             return true;
         }
         return false;

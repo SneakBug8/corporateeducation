@@ -1,4 +1,6 @@
 import { isArray } from "util";
+import * as knex from "knex";
+
 
 interface IAdminQuery
 {
@@ -29,7 +31,7 @@ export function ParseAdminQuery(input: any)
   return res;
 }
 
-export function ConvertAdminQuery(input: any, query: any)
+export function ConvertAdminQuery(input: any, query: knex.QueryBuilder)
 {
   if (input.range) {
     const range = JSON.parse(input.range);

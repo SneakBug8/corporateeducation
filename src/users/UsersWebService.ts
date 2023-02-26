@@ -3,11 +3,10 @@ import * as express from "express";
 import { Logger } from "winston";
 import { IMyRequest } from "../api/WebClientUtil";
 import { ParseAdminQuery } from "../api/AdminQuery";
-import { WebResponse } from "../web/WebResponse";
-import { ResponseTypes } from "../web/ResponseTypes";
 import { User } from "./User";
+import { UserController } from "./controllers/UserController";
 
-class EducationWebServiceClass {
+class UsersWebServiceClass {
     public Init() {
         WebApi.app.get("/api/users/:id", this.onUserGet);
         WebApi.app.post("/api/users", this.onUserInsert);
@@ -18,14 +17,19 @@ class EducationWebServiceClass {
 
     public async onUserGet(req: IMyRequest, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
-        const r = await User.GetById(id);
+        const r = await UserController.GetById(id);
+
+        if (r) {
+            r.password = "";
+        }
+
         res.json(r);
     }
 
     public async onUserInsert(req: IMyRequest, res: express.Response) {
         const exercise = req.body as User;
 
-        const r = await User.Insert(exercise);
+        const r = await UserController.Insert(exercise);
 
         res.json(r);
     }
@@ -37,31 +41,41 @@ class EducationWebServiceClass {
             return;
         }
 
-        const r = await User.Update(t);
+        if (t.password) {
+            const r = await UserController.GetById(t.id);
+            t.password = r?.password;
+        }
+
+        const r = await UserController.Update(t);
         res.json(r);
     }
 
     public async onUserDelete(req: IMyRequest, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
-        const r = await User.Delete(id);
+        const r = await UserController.Delete(id);
         res.json({ id: r });
     }
 
     public async onGetUsers(req: IMyRequest, res: express.Response) {
         try {
-            const r = await User.GetMany(req.query);
+            const r = await UserController.GetMany(req.query) as User[];
 
             const adminquery = ParseAdminQuery(req.query);
-            const count = await User.Count();
+            const count = await UserController.Count();
+
+            if (r) {
+                r.forEach((x) => x.password = "");
+            }
 
             res.header("Content-Range", `users ${adminquery.from}-${adminquery.to}/${count}`);
             res.json(r);
         }
         catch (e) {
             console.error(e);
+            res.json([]);
         }
     }
 
 }
 
-export const EducationWebService = new EducationWebServiceClass();
+export const UsersWebService = new UsersWebServiceClass();

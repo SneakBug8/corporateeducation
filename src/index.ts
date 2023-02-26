@@ -12,6 +12,7 @@ import { MessageWrapper } from "./MessageWrapper";
 
 
 import { EducationWebService } from "./education/EducationWebService";
+import { UsersWebService } from "./users/UsersWebService";
 
 
 let waitingCallback: ((message: MessageWrapper) => any) | null = null;
@@ -62,7 +63,7 @@ class App {
         }
     }
 
-    public constructor() {
+    public Init() {
         /*
 
         this.bot = BotAPI;
@@ -80,6 +81,7 @@ class App {
 
 */
         EducationWebService.Init();
+        UsersWebService.Init();
         setInterval(this.Intervals.bind(this), 15 * 60 * 1000);
     }
 
@@ -210,6 +212,7 @@ class App {
 }
 
 export const Server = new App();
+Server.Init();
 
 console.log("Bot started");
 async function a() {
