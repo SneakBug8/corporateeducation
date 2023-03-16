@@ -13,6 +13,8 @@ import { ExerciseRun } from "./entities/ExerciseRun";
 import { UserAnswer } from "./entities/UserAnswer";
 import { UserAnswerController } from "./controllers/UserAnswerController";
 import { ExerciseScheduleController } from "./controllers/ExerciseScheduleController";
+import { UserController } from "../users/controllers/UserController";
+import { IExerciseContent } from "./entities/ExerciseStep";
 
 class EducationServiceClass extends EventEmitter {
 
@@ -43,7 +45,8 @@ class EducationServiceClass extends EventEmitter {
             throw new Error("No such step");
         }
 
-        return JSON.parse(step.content || "{}");
+        return new WebResponse<IExerciseContent>(true, ResponseTypes.OK)
+            .SetData(step.content || JSON.parse(step._content || "{}") as IExerciseContent);
     }
 
     public async CanDoTask(userId: number, exerciseId: number) {
@@ -85,7 +88,11 @@ class EducationServiceClass extends EventEmitter {
     }
 
     private async EnsureRun(userId: number, exerciseId: number) {
+        console.log(`Ensuring Run of user ${userId} for exercise ${exerciseId}`);
+
         let run = await ExerciseRunController.GetWithUserAndExercise(userId, exerciseId);
+
+        console.log(run);
 
         if (!run) {
             run = await this.StartTask(userId, exerciseId);
@@ -116,6 +123,9 @@ class EducationServiceClass extends EventEmitter {
         run.finished = false;
         run.step = 0;
         run.experience = 0;
+        run.trynumber += 1;
+        run.RESTART_DT = MIS_DT.GetExact();
+
         await ExerciseRunController.Update(run);
         return run;
     }
@@ -148,6 +158,7 @@ class EducationServiceClass extends EventEmitter {
             // Wrong answer - no XP added
             run.experience = (run.experience || 0) + 0;
             run.step++;
+            run.mistakes = (run.mistakes || 0) + 1;
         }
         else {
             // Set next step
@@ -156,13 +167,14 @@ class EducationServiceClass extends EventEmitter {
         }
 
         console.log(`User ${userId} passed to step ${run.step} in exercise ${exerciseId}. Current experience: ${run.experience}`);
-        await ExerciseRunController.Update(run);
-
         const noofsteps = await ExerciseStepController.CountWithExercise(run.exercise);
         // steps numbered from zero: 0, 1. no of steps = 2, when step ind == 2, we have done all steps
         if (run.step === noofsteps) {
             const r1 = await this.FinalizeTask(run);
             return r1;
+        }
+        else {
+            await ExerciseRunController.Update(run);
         }
 
         return r;
@@ -170,10 +182,9 @@ class EducationServiceClass extends EventEmitter {
 
     private async FinalizeTask(run: ExerciseRun) {
         const now = MIS_DT.GetExact();
-        const time = Math.floor(now - run.MIS_DT) / 1000;
+        const time = Math.floor((now - run.RESTART_DT) / 1000);
+        run.time = time;
         run.experience = await this.AdjustExperienceToTime(run.exercise, run.experience || 0, time);
-
-        await ExerciseRunController.Update(run);
 
         const t = await this.CheckEducationScheduleOnRunSubmission(run.user, run.exercise);
 
@@ -225,6 +236,7 @@ class EducationServiceClass extends EventEmitter {
             answer.exercise = exerciseId;
             answer.step = stepno;
             answer.user = userId;
+            answer.maxexperience = step.experience;
             await UserAnswerController.Insert(answer);
             return new WebResponse(true, ResponseTypes.CollectedAnswer);
         }
@@ -256,7 +268,7 @@ class EducationServiceClass extends EventEmitter {
             throw new Error("No such answer");
         }
 
-        answer.experience = experience;
+        answer.experience = Math.max(answer.maxexperience || 0, experience);
         answer.marked = true;
 
         await UserAnswerController.Update(answer);
@@ -274,7 +286,7 @@ class EducationServiceClass extends EventEmitter {
             return new WebResponse(true, ResponseTypes.OK);
         }
 
-        const user = await User.GetById(userId);
+        const user = await UserController.GetById(userId);
 
         if (!user) {
             return new WebResponse(false, ResponseTypes.NoSuchUser);
@@ -323,7 +335,7 @@ class EducationServiceClass extends EventEmitter {
             return new WebResponse(true, ResponseTypes.OK);
         }
 
-        const user = await User.GetById(userId);
+        const user = await UserController.GetById(userId);
 
         if (!user) {
             return new WebResponse(false, ResponseTypes.NoSuchUser);

@@ -13,5 +13,7 @@ export class User extends Entity {
     public role: number | undefined = 0;
     public group: number | undefined;
     public AUTHORIZED_DT = MIS_DT.GetExact();
+    public DEAUTHORIZED_DT = MIS_DT.GetExact();
+    public timeonline: number | undefined = 0;
 }
 

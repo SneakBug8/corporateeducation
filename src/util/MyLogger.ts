@@ -1,6 +1,6 @@
 import * as winston from "winston";
 
-export const Logger = winston.createLogger({
+export const MyLogger = winston.createLogger({
   transports: [
     new winston.transports.File({
       level: "verbose",
@@ -14,7 +14,7 @@ export const Logger = winston.createLogger({
 });
 
 if (process.env.NODE_ENV !== "production") {
-  Logger.add(new winston.transports.Console({
+  MyLogger.add(new winston.transports.Console({
     format: winston.format.simple(),
   }));
 }

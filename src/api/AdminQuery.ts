@@ -1,17 +1,14 @@
 import { isArray } from "util";
 import * as knex from "knex";
 
-
-interface IAdminQuery
-{
+interface IAdminQuery {
   from?: number;
   to?: number;
   sortby?: string;
   sortway?: string;
 }
 
-export function ParseAdminQuery(input: any)
-{
+export function ParseAdminQuery(input: any) {
   const res: IAdminQuery = {};
   if (input.range) {
     const range = JSON.parse(input.range);
@@ -31,8 +28,17 @@ export function ParseAdminQuery(input: any)
   return res;
 }
 
-export function ConvertAdminQuery(input: any, query: knex.QueryBuilder)
-{
+function valueCleanup(value: any) {
+  if (value === false) {
+    value = 0;
+  }
+  else if (value === true) {
+    value = 1;
+  }
+  return value;
+}
+
+export function ConvertAdminQuery(input: any, query: knex.QueryBuilder) {
   if (input.range) {
     const range = JSON.parse(input.range);
     if (range.length === 2) {
@@ -53,12 +59,14 @@ export function ConvertAdminQuery(input: any, query: knex.QueryBuilder)
         const key = filter[0][0].toUpperCase() + (filter[0] as string).substring(1);
 
         if (isArray(filter[1])) {
-          for (const value of filter[1]) {
+          for (let value of filter[1]) {
+            value = valueCleanup(value);
             query = query.orWhere(key, value);
           }
         }
         else {
-          query = query.orWhere(key, "LIKE", "%" + filter[1] + "%");
+          const value = valueCleanup(filter[1]);
+          query = query.andWhere(key, "LIKE", "%" + value + "%");
         }
       }
     }

@@ -25,6 +25,11 @@ export class ResponseTypes {
 
     public static NoSuchLeague = makeResponseType(21, "No such league");
 
+    public static WrongRequestSignature = makeResponseType(22, "Wrong Request Signature. Not all fields present");
+    public static WrongLoginOrPassword = makeResponseType(23, "Wrong Login or Password");
+    public static NoTokenProvided = makeResponseType(24, "No token provided");
+
+
 }
 
 function makeResponseType(id: number, text: string) {

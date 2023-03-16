@@ -5,14 +5,41 @@ import { IMyRequest } from "../api/WebClientUtil";
 import { ParseAdminQuery } from "../api/AdminQuery";
 import { User } from "./User";
 import { UserController } from "./controllers/UserController";
+import { WebResponse } from "../web/WebResponse";
+import { ResponseTypes } from "../web/ResponseTypes";
+import { AuthService } from "./AuthService";
 
 class UsersWebServiceClass {
     public Init() {
+        WebApi.app.get("/api/auth", this.onAuth);
+
         WebApi.app.get("/api/users/:id", this.onUserGet);
         WebApi.app.post("/api/users", this.onUserInsert);
         WebApi.app.put("/api/users/:id", this.onUserUpdate);
         WebApi.app.delete("/api/users/:id", this.onUserDelete);
         WebApi.app.all("/api/users", this.onGetUsers);
+    }
+
+    public async onAuth(req: IMyRequest, res: express.Response) {
+        const data = req.body;
+        const login = data.login;
+        const password = data.password;
+
+        if (!login || !password) {
+            return res.json(new WebResponse(false, ResponseTypes.WrongRequestSignature).copy());
+        }
+
+        const r = await AuthService.TryAuthWeb(login, password);
+
+        if (!r) {
+            return res.json(new WebResponse(false, ResponseTypes.WrongLoginOrPassword).copy());
+        }
+
+        const token = await AuthService.CreateToken(login);
+
+        const resdata = new WebResponse(true, ResponseTypes.OK).SetData({token});
+
+        res.json(resdata.copy());
     }
 
     public async onUserGet(req: IMyRequest, res: express.Response) {
@@ -41,9 +68,8 @@ class UsersWebServiceClass {
             return;
         }
 
-        if (t.password) {
-            const r = await UserController.GetById(t.id);
-            t.password = r?.password;
+        if (!t.password) {
+            t.password = undefined;
         }
 
         const r = await UserController.Update(t);

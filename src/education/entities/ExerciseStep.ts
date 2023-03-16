@@ -11,7 +11,7 @@ export class ExerciseStep extends Entity {
     public experience: number = 0;
 }
 
-interface IExerciseContent {
+export interface IExerciseContent {
     text: string;
     answers: string[];
 }

@@ -2,10 +2,10 @@
 import "app-module-path/register";
 import * as appmodulepath from "app-module-path";
 
-import { Logger } from "./util/Logger";
+import { MyLogger } from "./util/MyLogger";
 
 appmodulepath.addPath(__dirname);
 
 export const Load = async () => {
-    Logger.info("Modules initialized in " + __dirname);
+    MyLogger.info("Modules initialized in " + __dirname);
 };

@@ -25,7 +25,7 @@ class UserControllerClass extends EntityFactory<User> {
         const entries = await this.Repository().where("username", "LIKE", `%${name}%`).select();
 
         if (entries.length) {
-            return entries[0];
+            return entries[0] as User;
         }
 
         return null;

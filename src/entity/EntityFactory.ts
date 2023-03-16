@@ -14,6 +14,10 @@ export class EntityFactory<T extends Entity> {
         return t;
     }
 
+    public Cleanup(t: T) {
+        return t;
+    }
+
     public async GetById(id: number) {
         const entries = await this.Repository().where("id", "LIKE", `%${id}%`).select();
 
@@ -43,6 +47,8 @@ export class EntityFactory<T extends Entity> {
     }
 
     public async Insert(exercise: T) {
+        exercise = this.Cleanup(exercise);
+        exercise.MIS_DT = MIS_DT.GetExact();
         exercise.UPDATED_DT = MIS_DT.GetExact();
         const r = await this.Repository().insert(exercise);
 
@@ -51,6 +57,7 @@ export class EntityFactory<T extends Entity> {
     }
 
     public async Update(exercise: T) {
+        exercise = this.Cleanup(exercise);
         exercise.UPDATED_DT = MIS_DT.GetExact();
         await this.Repository().where("id", exercise.id).update(exercise);
         return this.Parse(exercise);

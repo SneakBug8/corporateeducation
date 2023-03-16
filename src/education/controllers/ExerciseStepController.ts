@@ -22,7 +22,7 @@ class ExerciseStepControllerClass extends EntityFactory<ExerciseStep> {
             .andWhere("stepnumber", "LIKE", `%${step}%`).select();
 
         if (entries.length) {
-            return entries[0];
+            return entries[0] as ExerciseStep;
         }
     }
 

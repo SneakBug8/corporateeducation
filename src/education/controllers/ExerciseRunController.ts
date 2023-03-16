@@ -1,13 +1,9 @@
-import { Entity } from "../../entity/Entity";
 import { EntityFactory } from "../../entity/EntityFactory";
 import { Connection } from "../../Database";
-import { ExerciseStep } from "../entities/ExerciseStep";
 import { ExerciseRun } from "../entities/ExerciseRun";
-import { ConvertAdminQuery } from "../../api/AdminQuery";
-import { GroupController } from "./GroupController";
-import { UserController } from "../../users/controllers/UserController";
+import { ExerciseRunHistory } from "./ExerciseRunHistory";
 
-class ExerciseRunControllerClass<T extends Entity> extends EntityFactory<T> {
+class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
     public async GetWithUser(userId: number) {
         const entries = await this.Repository().where("user", userId).select();
         return entries;
@@ -18,7 +14,7 @@ class ExerciseRunControllerClass<T extends Entity> extends EntityFactory<T> {
             .andWhere("FINISHED_DT", ">", startDt)
             .andWhere("FINISHED_DT", "<", endDt)
             .select();
-        return entries;
+        return entries as ExerciseRun[];
     }
 
     public async GetWithExercise(id: number) {
@@ -27,12 +23,38 @@ class ExerciseRunControllerClass<T extends Entity> extends EntityFactory<T> {
     }
 
     public async GetWithUserAndExercise(userId: number, exerciseId: number) {
-        const entries = await this.Repository().where("user", "LIKE", `%${userId}%`).andWhere("exercise", "LIKE", `%${exerciseId}%`).select();
+        const entries = await this.Repository().where("user", "LIKE", `%${userId}%`)
+            .andWhere("exercise", "LIKE", `%${exerciseId}%`)
+            .orderBy("trynumber", "desc").select();
         if (entries.length) {
-            return entries[0];
+            return entries[0] as ExerciseRun;
         }
+    }
+
+    public Cleanup(t: ExerciseRun): ExerciseRun {
+        delete (t as any).userId;
+        delete (t as any).userGroup;
+        return t;
+    }
+
+    public async Insert(exercise: ExerciseRun): Promise<ExerciseRun> {
+        const r = await super.Insert(exercise);
+
+        exercise.id = undefined;
+        ExerciseRunHistory.Insert(exercise);
+
+        return r;
+    }
+
+    public async Update(exercise: ExerciseRun): Promise<ExerciseRun> {
+        const r = await super.Update(exercise);
+
+        exercise.id = undefined;
+        ExerciseRunHistory.Insert(exercise);
+
+        return r;
     }
 }
 
-export const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as i, `group` from Users) as a on a.i = Runs.user");
-export const ExerciseRunController = new ExerciseRunControllerClass<ExerciseRun>(RunsRepository);
+export const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.user");
+export const ExerciseRunController = new ExerciseRunControllerClass(RunsRepository);

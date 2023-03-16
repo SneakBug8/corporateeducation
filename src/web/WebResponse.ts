@@ -1,11 +1,11 @@
 import { ResponseTypes } from "./ResponseTypes";
 
-export class WebResponse {
+export class WebResponse<T> {
 
     private ok: boolean;
     private reason: ResponseTypes = ResponseTypes.Null;
 
-    private data: object | undefined = undefined;
+    private data: T | undefined = undefined;
 
     public history = new Array<ResponseTypes>();
 
@@ -22,8 +22,9 @@ export class WebResponse {
         this.history.push(reason);
     }
 
-    public SetData(data: object | undefined) {
+    public SetData(data: T | undefined) {
         this.data = data;
+        return this;
     }
 
     public GetReason() {
@@ -42,12 +43,16 @@ export class WebResponse {
         return expect;
     }
 
+    public copy() {
+        return Object.assign({}, this);
+    }
+
     public toJSON() {
-        return JSON.stringify(this);
+        return JSON.stringify(Object.assign({}, this));
     }
 
     public fromJSON(json: string) {
         const temp = JSON.parse(json);
-        return temp as WebResponse;
+        return temp as WebResponse<object>;
     }
 }

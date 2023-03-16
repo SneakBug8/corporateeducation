@@ -13,6 +13,8 @@ import { MessageWrapper } from "./MessageWrapper";
 
 import { EducationWebService } from "./education/EducationWebService";
 import { UsersWebService } from "./users/UsersWebService";
+import { LeagueWebService } from "./leagues/LeagueWebService";
+import { AuthService } from "./users/AuthService";
 
 
 let waitingCallback: ((message: MessageWrapper) => any) | null = null;
@@ -82,13 +84,16 @@ class App {
 */
         EducationWebService.Init();
         UsersWebService.Init();
-        setInterval(this.Intervals.bind(this), 15 * 60 * 1000);
+        LeagueWebService.Init();
+
+        setInterval(this.Intervals.bind(this), 5 * 60 * 1000);
     }
 
     public async Intervals() {
         const listeners = [
             // Scheduler.Interval.bind(Scheduler),
             BackupCycle,
+            AuthService.ReviewTokens.bind(AuthService),
         ];
 
         for (const listener of listeners) {
@@ -216,7 +221,12 @@ Server.Init();
 
 console.log("Bot started");
 async function a() {
+    try {
     console.log(`Server ip ${await Config.ip()}`);
+    }   
+    catch (e) {
+        console.error(e);
+    }
 }
 a();
 

@@ -1,15 +1,15 @@
-import { ExerciseRun } from "../education/ExerciseRun";
-import { Group } from "../education/Group";
+import { ExerciseRunController } from "../education/controllers/ExerciseRunController";
+import { UserController } from "../users/controllers/UserController";
 import { User } from "../users/User";
 import { MIS_DT } from "../util/MIS_DT";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { WebResponse } from "../web/WebResponse";
-import { League } from "./League";
+import { LeagueController } from "./LeagueController";
 import { LeagueRow } from "./LeagueRow";
 
 export class LeaguesService {
     public static async GetLeaderboard(leagueId: number) {
-        const league = await League.GetById(leagueId);
+        const league = await LeagueController.GetById(leagueId);
 
         if (!league) {
             return [];
@@ -27,7 +27,7 @@ export class LeaguesService {
             throw new Error("No league end defined");
         }
 
-        const users = await User.GetWithGroup(league.group);
+        const users = await UserController.GetWithGroup(league.group);
         const experienceRows = new Array<LeagueRow>();
 
         for (const user of users) {
@@ -35,7 +35,7 @@ export class LeaguesService {
                 continue;
             }
 
-            const eligibleRuns = await ExerciseRun.GetWithUserAndDate(user.id, league.starts, league.ends);
+            const eligibleRuns = await ExerciseRunController.GetWithUserAndDate(user.id, league.starts, league.ends);
 
             const xpsum = eligibleRuns.filter((x) => x.finished)
                 .reduce((p, c) => p + (c.experience || 0), 0);
@@ -51,7 +51,7 @@ export class LeaguesService {
     }
 
     public static async FinalizeLeague(leagueId: number) {
-        const league = await League.GetById(leagueId);
+        const league = await LeagueController.GetById(leagueId);
 
         if (!league) {
             return new WebResponse(false, ResponseTypes.NoSuchLeague);
@@ -63,13 +63,13 @@ export class LeaguesService {
             league.winner = leaderboard[0].userId;
         }
 
-        await League.Update(league);
+        await LeagueController.Update(league);
 
         return new WebResponse(true, ResponseTypes.OK);
     }
 
     public static async OpenLeague(leagueId: number) {
-        const league = await League.GetById(leagueId);
+        const league = await LeagueController.GetById(leagueId);
 
         if (!league) {
             return new WebResponse(false, ResponseTypes.NoSuchLeague);
@@ -77,7 +77,7 @@ export class LeaguesService {
 
         league.starts = MIS_DT.GetExact();
 
-        await League.Update(league);
+        await LeagueController.Update(league);
 
         return new WebResponse(true, ResponseTypes.OK);
     }

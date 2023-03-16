@@ -31,7 +31,7 @@ class UserAnswerControllerClass<T extends Entity> extends EntityFactory<T> {
         const entries = await this.Repository().where("user", "LIKE", `%${userId}%`).andWhere("exercise", "LIKE", `%${exerciseId}%`)
         .andWhere("step", step).select();
         if (entries.length) {
-            return entries[0];
+            return entries[0] as UserAnswer;
         }
     }
 }

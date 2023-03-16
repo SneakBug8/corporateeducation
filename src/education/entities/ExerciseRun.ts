@@ -1,4 +1,5 @@
 import { Entity } from "../../entity/Entity";
+import { MIS_DT } from "../../util/MIS_DT";
 export class ExerciseRun extends Entity {
 
     public user: number = 0;
@@ -9,5 +10,7 @@ export class ExerciseRun extends Entity {
     public step: number = 0;
     public finished: boolean = false;
     public FINISHED_DT = 0;
-
+    public RESTART_DT = MIS_DT.GetExact();
+    public trynumber: number = 0;
+    public mistakes: number = 0;
 }
