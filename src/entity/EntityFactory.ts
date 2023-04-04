@@ -10,11 +10,11 @@ export class EntityFactory<T extends Entity> {
         this.Repository = repo;
     }
 
-    public Parse(t: T) {
+    public async Parse(t: T) {
         return t;
     }
 
-    public Cleanup(t: T) {
+    public async Cleanup(t: T) {
         return t;
     }
 
@@ -47,7 +47,7 @@ export class EntityFactory<T extends Entity> {
     }
 
     public async Insert(exercise: T) {
-        exercise = this.Cleanup(exercise);
+        exercise = await this.Cleanup(exercise);
         exercise.MIS_DT = MIS_DT.GetExact();
         exercise.UPDATED_DT = MIS_DT.GetExact();
         const r = await this.Repository().insert(exercise);
@@ -57,7 +57,7 @@ export class EntityFactory<T extends Entity> {
     }
 
     public async Update(exercise: T) {
-        exercise = this.Cleanup(exercise);
+        exercise = await this.Cleanup(exercise);
         exercise.UPDATED_DT = MIS_DT.GetExact();
         await this.Repository().where("id", exercise.id).update(exercise);
         return this.Parse(exercise);
@@ -65,7 +65,7 @@ export class EntityFactory<T extends Entity> {
 
     public async GetMany(query: any) {
         const data = await ConvertAdminQuery(query, this.Repository().select()) as T[];
-        const r = data.map((x) => this.Parse(x));
+        const r = await Promise.all(data.map(async (x) => await this.Parse(x)));
 
         return r;
     }

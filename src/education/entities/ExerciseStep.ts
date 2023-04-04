@@ -7,7 +7,7 @@ export class ExerciseStep extends Entity {
     public type: string | undefined;
     public _content: string | undefined;
     public content: IExerciseContent | undefined;
-    public answer: string | undefined;
+    public correctAnswer: string | undefined;
     public experience: number = 0;
 }
 

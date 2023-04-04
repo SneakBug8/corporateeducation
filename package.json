@@ -56,6 +56,7 @@
     "@types/ftp": "^0.3.31",
     "@types/level": "^6.0.0",
     "@types/marked": "^4.0.3",
+    "@types/material-ui": "^0.21.12",
     "@types/mocha": "^9.1.0",
     "@types/node-telegram-bot-api": "^0.31.0",
     "@types/winston": "^2.4.4",

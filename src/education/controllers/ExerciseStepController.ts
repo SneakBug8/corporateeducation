@@ -4,7 +4,7 @@ import { Connection } from "../../Database";
 import { ExerciseStep } from "../entities/ExerciseStep";
 
 class ExerciseStepControllerClass extends EntityFactory<ExerciseStep> {
-    public Parse(t: ExerciseStep): ExerciseStep {
+    public async Parse(t: ExerciseStep) {
         if (t._content) {
             t.content = JSON.parse(t._content);
         }
@@ -37,6 +37,6 @@ class ExerciseStepControllerClass extends EntityFactory<ExerciseStep> {
     }
 }
 
-export const ExerciseStepsRepository = () => Connection<ExerciseStep>("ExerciseSteps");
+const ExerciseStepsRepository = () => Connection<ExerciseStep>("ExerciseSteps");
 
 export const ExerciseStepController = new ExerciseStepControllerClass(ExerciseStepsRepository);

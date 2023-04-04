@@ -3,7 +3,6 @@ import * as express from "express";
 import { Entity } from "../entity/Entity";
 import { EntityFactory } from "../entity/EntityFactory";
 import { ParseAdminQuery } from "./AdminQuery";
-import { IMyRequest } from "./WebClientUtil";
 
 export class CRUDRouter<T extends Entity> {
     public collectionname = "";
@@ -25,13 +24,13 @@ export class CRUDRouter<T extends Entity> {
         return router;
     }
 
-    public async onXGet(req: IMyRequest, res: express.Response) {
+    public async onXGet(req: express.Request, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
         const r = await this.Controller.GetById(id);
         res.json(r);
     }
 
-    public async onXInsert(req: IMyRequest, res: express.Response) {
+    public async onXInsert(req: express.Request, res: express.Response) {
         const exercise = req.body as T;
 
         console.log(exercise);
@@ -41,7 +40,7 @@ export class CRUDRouter<T extends Entity> {
         res.json(r);
     }
 
-    public async onXUpdate(req: IMyRequest, res: express.Response) {
+    public async onXUpdate(req: express.Request, res: express.Response) {
         const e = req.body as T;
 
         if (!e || !e.id) {
@@ -52,13 +51,13 @@ export class CRUDRouter<T extends Entity> {
         res.json(r);
     }
 
-    public async onXDelete(req: IMyRequest, res: express.Response) {
+    public async onXDelete(req: express.Request, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
         const r = await this.Controller.Delete(id);
         res.json({ id: r });
     }
 
-    public async onGetXs(req: IMyRequest, res: express.Response) {
+    public async onGetXs(req: express.Request, res: express.Response) {
         try {
             const r = await this.Controller.GetMany(req.query);
 

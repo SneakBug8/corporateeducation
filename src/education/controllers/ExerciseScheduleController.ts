@@ -18,6 +18,6 @@ class ExerciseScheduleControllerClass<T extends Entity> extends EntityFactory<T>
         return entry;
     }
 }
-export const ExerciseSchedulesRepository = () => Connection<ExerciseSchedule>("ExerciseSchedules");
+const ExerciseSchedulesRepository = () => Connection<ExerciseSchedule>("ExerciseSchedules");
 export const ExerciseScheduleController =
     new ExerciseScheduleControllerClass<ExerciseSchedule>(ExerciseSchedulesRepository);

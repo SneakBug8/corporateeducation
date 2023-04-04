@@ -1,13 +1,13 @@
 import { WebApi } from "../api/web";
 import * as express from "express";
 import { Logger } from "winston";
-import { IMyRequest } from "../api/WebClientUtil";
 import { ParseAdminQuery } from "../api/AdminQuery";
 import { User } from "./User";
 import { UserController } from "./controllers/UserController";
 import { WebResponse } from "../web/WebResponse";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { AuthService } from "./AuthService";
+import { ToMD5 } from "../util/ToMd5";
 
 class UsersWebServiceClass {
     public Init() {
@@ -20,7 +20,7 @@ class UsersWebServiceClass {
         WebApi.app.all("/api/users", this.onGetUsers);
     }
 
-    public async onAuth(req: IMyRequest, res: express.Response) {
+    public async onAuth(req: express.Request, res: express.Response) {
         const data = req.body;
         const login = data.login;
         const password = data.password;
@@ -42,7 +42,7 @@ class UsersWebServiceClass {
         res.json(resdata.copy());
     }
 
-    public async onUserGet(req: IMyRequest, res: express.Response) {
+    public async onUserGet(req: express.Request, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
         const r = await UserController.GetById(id);
 
@@ -53,7 +53,7 @@ class UsersWebServiceClass {
         res.json(r);
     }
 
-    public async onUserInsert(req: IMyRequest, res: express.Response) {
+    public async onUserInsert(req: express.Request, res: express.Response) {
         const exercise = req.body as User;
 
         const r = await UserController.Insert(exercise);
@@ -61,7 +61,7 @@ class UsersWebServiceClass {
         res.json(r);
     }
 
-    public async onUserUpdate(req: IMyRequest, res: express.Response) {
+    public async onUserUpdate(req: express.Request, res: express.Response) {
         const t = req.body as User;
 
         if (!t || !t.id) {
@@ -76,15 +76,15 @@ class UsersWebServiceClass {
         res.json(r);
     }
 
-    public async onUserDelete(req: IMyRequest, res: express.Response) {
+    public async onUserDelete(req: express.Request, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
         const r = await UserController.Delete(id);
         res.json({ id: r });
     }
 
-    public async onGetUsers(req: IMyRequest, res: express.Response) {
+    public async onGetUsers(req: express.Request, res: express.Response) {
         try {
-            const r = await UserController.GetMany(req.query) as User[];
+            const r = await UserController.GetMany(req.query);
 
             const adminquery = ParseAdminQuery(req.query);
             const count = await UserController.Count();

@@ -2,8 +2,8 @@ import { Entity } from "../../entity/Entity";
 import { MIS_DT } from "../../util/MIS_DT";
 export class ExerciseRun extends Entity {
 
-    public user: number = 0;
-    public exercise: number = 0;
+    public userId: number = 0;
+    public exerciseId: number = 0;
     public time: number | undefined;
     public experience: number | undefined;
     public data: string | undefined;

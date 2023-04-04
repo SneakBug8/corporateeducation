@@ -42,5 +42,5 @@ class UserControllerClass extends EntityFactory<User> {
     }
 }
 
-export const UsersRepository = () => Connection<User>("Users");
+const UsersRepository = () => Connection<User>("Users");
 export const UserController = new UserControllerClass(UsersRepository);

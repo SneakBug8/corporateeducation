@@ -45,8 +45,6 @@ export function ConvertAdminQuery(input: any, query: knex.QueryBuilder) {
       const amount = range[1] - range[0] + 1;
       query.offset(range[0]);
       query.limit(amount);
-      /* query.where("id", ">", range[0]);
-      query.where("id", "<", range[1]); */
     }
   }
   if (input.filter) {

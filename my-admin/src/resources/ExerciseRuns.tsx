@@ -21,8 +21,8 @@ const CustomToolbar = ({ ...props }: any) => {
 // Filters
 const postFilters = [
     <TextInput label="Id" source="id" alwaysOn />,
-    <ReferenceInput label="User" source="user" reference="users"/>,
-    <ReferenceInput label="Exercise" source="exercise" reference="exercises" />,
+    <ReferenceInput label="User" source="userId" reference="users"/>,
+    <ReferenceInput label="Exercise" source="exerciseId" reference="exercises" />,
     <ReferenceInput source="group" reference="groups"/>
 ];
 
@@ -37,9 +37,9 @@ export const ExerciseRunsList = (props: any) => (
     <List {...props} actions={<MyActions />} filters={postFilters}>
         <Datagrid>
             <TextField source="id" />
-            <ReferenceField source="exercise" reference="exercises" />
+            <ReferenceField source="exerciseId" reference="exercises" />
             <ReferenceField source="userGroup" reference="groups" />
-            <ReferenceField source="user" reference="users" />
+            <ReferenceField source="userId" reference="users" />
             <TextField source="experience" />
             <BooleanField source="finished" looseValue={true}/>
             <DateField source="FINISHED_DT" />
@@ -59,10 +59,10 @@ export const ExerciseRunEdit = (props: any) => (
     <Edit title={<ExerciseRunTitle />} {...props}>
         <SimpleForm toolbar={<CustomToolbar {...props} />}>
             <TextInput disabled source="id" />
-            <ReferenceInput source="exercise" reference="exercises">
+            <ReferenceInput source="exerciseId" reference="exercises">
                 <AutocompleteInput optionText="name" />
             </ ReferenceInput>
-            <ReferenceInput source="user" reference="users"/>
+            <ReferenceInput source="userId" reference="users"/>
             <TextInput source="time" />
             <TextInput source="experience" />
             <TextInput source="step" />
@@ -80,10 +80,10 @@ export const ExerciseRunCreate = (props: any) => (
     <Create title="Create a Run" {...props}>
         <SimpleForm>
             <TextInput disabled source="id" />
-            <ReferenceInput source="exercise" reference="exercises">
+            <ReferenceInput source="exerciseId" reference="exercises">
                 <AutocompleteInput optionText="name" />
             </ ReferenceInput>
-            <ReferenceInput source="user"  reference="users" />
+            <ReferenceInput source="userId"  reference="users" />
             <TextInput source="time" />
             <TextInput source="experience" />
             <TextInput source="step" />

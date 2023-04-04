@@ -1,5 +1,6 @@
 import { Config } from "../config";
 import { MIS_DT } from "../util/MIS_DT";
+import { ToMD5 } from "../util/ToMd5";
 import { UserController } from "./controllers/UserController";
 
 interface ITokenEntry {
@@ -26,11 +27,14 @@ class AuthServiceClass {
 
         console.log(`Created session for ${login}`);
         this.AuthenticatedTokens.push({ token, login, liveuntil: MIS_DT.GetExact() + MIS_DT.OneMinute() * 15 });
-        return token;
+
+        const md5 = ToMD5(token);
+
+        return md5;
     }
 
-    public async RetrieveByToken(token: string) {
-        const suitable = this.AuthenticatedTokens.filter((x) => x.token === token);
+    public async RetrieveByToken(md5token: string) {
+        const suitable = this.AuthenticatedTokens.filter((x) => ToMD5(x.token) === md5token);
         if (!suitable.length) {
             return null;
         }
@@ -77,7 +81,7 @@ class AuthServiceClass {
             return false;
         }
 
-        if (pswd === user.password) {
+        if (pswd === user.password || pswd === ToMD5(user.password || "")) {
             user.AUTHORIZED_DT = MIS_DT.GetExact();
             UserController.Update(user);
             return true;

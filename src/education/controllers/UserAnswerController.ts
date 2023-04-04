@@ -36,5 +36,5 @@ class UserAnswerControllerClass<T extends Entity> extends EntityFactory<T> {
     }
 }
 
-export const AnswersRepository = () => Connection<UserAnswer>("Answers");
+const AnswersRepository = () => Connection<UserAnswer>("Answers");
 export const UserAnswerController = new UserAnswerControllerClass<UserAnswer>(AnswersRepository);

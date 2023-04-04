@@ -110,8 +110,8 @@ class EducationServiceClass extends EventEmitter {
         r.Expect(true);
 
         const run = new ExerciseRun();
-        run.exercise = exerciseId;
-        run.user = userId;
+        run.exerciseId = exerciseId;
+        run.userId = userId;
 
         await ExerciseRunController.Insert(run);
 
@@ -119,7 +119,7 @@ class EducationServiceClass extends EventEmitter {
     }
 
     private async RestartTask(run: ExerciseRun) {
-        console.log(`Task ${run.exercise} of user ${run.user} restarted`);
+        console.log(`Task ${run.exerciseId} of user ${run.userId} restarted`);
         run.finished = false;
         run.step = 0;
         run.experience = 0;
@@ -167,7 +167,7 @@ class EducationServiceClass extends EventEmitter {
         }
 
         console.log(`User ${userId} passed to step ${run.step} in exercise ${exerciseId}. Current experience: ${run.experience}`);
-        const noofsteps = await ExerciseStepController.CountWithExercise(run.exercise);
+        const noofsteps = await ExerciseStepController.CountWithExercise(run.exerciseId);
         // steps numbered from zero: 0, 1. no of steps = 2, when step ind == 2, we have done all steps
         if (run.step === noofsteps) {
             const r1 = await this.FinalizeTask(run);
@@ -184,12 +184,12 @@ class EducationServiceClass extends EventEmitter {
         const now = MIS_DT.GetExact();
         const time = Math.floor((now - run.RESTART_DT) / 1000);
         run.time = time;
-        run.experience = await this.AdjustExperienceToTime(run.exercise, run.experience || 0, time);
+        run.experience = await this.AdjustExperienceToTime(run.exerciseId, run.experience || 0, time);
 
-        const t = await this.CheckEducationScheduleOnRunSubmission(run.user, run.exercise);
+        const t = await this.CheckEducationScheduleOnRunSubmission(run.userId, run.exerciseId);
 
         if (t.Is(true)) {
-            console.log(`User ${run.user} finished exercise ${run.exercise}`);
+            console.log(`User ${run.userId} finished exercise ${run.exerciseId}`);
             run.finished = true;
             run.FINISHED_DT = MIS_DT.GetExact();
             await ExerciseRunController.Update(run);
@@ -223,7 +223,7 @@ class EducationServiceClass extends EventEmitter {
             return new WebResponse(true, ResponseTypes.AutoPass);
         }
         if (step.type === "quiz") {
-            if (step.answer === answer) {
+            if (step.correctAnswer === answer) {
                 return new WebResponse(true, ResponseTypes.CorrectAnswer);
             }
             else {

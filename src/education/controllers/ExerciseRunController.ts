@@ -31,7 +31,7 @@ class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
         }
     }
 
-    public Cleanup(t: ExerciseRun): ExerciseRun {
+    public async Cleanup(t: ExerciseRun) {
         delete (t as any).userId;
         delete (t as any).userGroup;
         return t;
@@ -56,5 +56,5 @@ class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
     }
 }
 
-export const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.user");
+const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.user");
 export const ExerciseRunController = new ExerciseRunControllerClass(RunsRepository);
