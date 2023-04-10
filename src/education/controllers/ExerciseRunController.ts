@@ -56,5 +56,5 @@ class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
     }
 }
 
-const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.user");
+const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.userId");
 export const ExerciseRunController = new ExerciseRunControllerClass(RunsRepository);
