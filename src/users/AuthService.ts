@@ -1,7 +1,7 @@
 import { Config } from "../config";
 import { MIS_DT } from "../util/MIS_DT";
 import { ToMD5 } from "../util/ToMd5";
-import { UserController } from "./controllers/UserController";
+import { UserRepository } from "./repositories/UserRepository";
 
 interface ITokenEntry {
     login: string;
@@ -15,7 +15,7 @@ class AuthServiceClass {
     public AuthenticatedTokens = new Array<ITokenEntry>();
 
     public async CreateToken(login: string) {
-        if (!await UserController.HasByLogin(login)) {
+        if (!await UserRepository.HasByLogin(login)) {
             throw new Error("No such User to create token");
         }
 
@@ -42,20 +42,20 @@ class AuthServiceClass {
         const login = suitable[0].login;
         suitable[0].liveuntil = MIS_DT.GetExact() + MIS_DT.OneMinute() * 15;
 
-        const user = await UserController.GetByLogin(login);
+        const user = await UserRepository.GetByLogin(login);
 
         if (!user) {
             return null;
         }
 
-        return user.id;
+        return user;
     }
 
     public async ReviewTokens() {
         const toremove = new Array<string>();
         for (const entry of this.AuthenticatedTokens) {
             if (entry.liveuntil <= MIS_DT.GetExact()) {
-                const user = await UserController.GetByLogin(entry.login);
+                const user = await UserRepository.GetByLogin(entry.login);
 
                 if (!user) {
                     continue;
@@ -64,7 +64,7 @@ class AuthServiceClass {
                 user.DEAUTHORIZED_DT = MIS_DT.GetExact();
                 user.timeonline = (user.timeonline || 0) + user.DEAUTHORIZED_DT - user.AUTHORIZED_DT;
 
-                await UserController.Update(user);
+                await UserRepository.Update(user);
 
                 toremove.push(entry.token);
                 console.log(`Dropping session of ${user.username}`);
@@ -75,7 +75,7 @@ class AuthServiceClass {
     }
 
     public async TryAuthWeb(login: string, pswd: string): Promise<boolean> {
-        const user = await UserController.GetByLogin(login);
+        const user = await UserRepository.GetByLogin(login);
 
         if (!user) {
             return false;
@@ -83,7 +83,7 @@ class AuthServiceClass {
 
         if (pswd === user.password || pswd === ToMD5(user.password || "")) {
             user.AUTHORIZED_DT = MIS_DT.GetExact();
-            UserController.Update(user);
+            UserRepository.Update(user);
             return true;
         }
         return false;

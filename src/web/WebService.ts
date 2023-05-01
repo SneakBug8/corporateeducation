@@ -21,9 +21,7 @@ class WebServiceClass
             return ResponseTypes.NotAuthorized;
         }
 
-        const r = await User.CheckRole(user.id, role);
-
-        return r;
+        return user.role && user.role >= role;
     }
 }
 

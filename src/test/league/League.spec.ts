@@ -46,7 +46,7 @@ describe("Leagues", () => {
         assert.ok(r3.Is(true), "Task wasn't finished");
 
         // As we finished all steps, task should've been finished
-        const finished = await EducationService.DidFinishTask(testuser, exerciseid);
+        const finished = await EducationService.DidUserFinishTask(testuser, exerciseid);
 
         assert.ok(finished, "Task wasn't finished");
     });

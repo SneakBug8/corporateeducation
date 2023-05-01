@@ -3,7 +3,7 @@ import { EntityFactory } from "../../entity/EntityFactory";
 import { Connection } from "../../Database";
 import { ExerciseStep } from "../entities/ExerciseStep";
 
-class ExerciseStepControllerClass extends EntityFactory<ExerciseStep> {
+class ExerciseStepRepositoryClass extends EntityFactory<ExerciseStep> {
     public async Parse(t: ExerciseStep) {
         if (t._content) {
             t.content = JSON.parse(t._content);
@@ -37,6 +37,6 @@ class ExerciseStepControllerClass extends EntityFactory<ExerciseStep> {
     }
 }
 
-const ExerciseStepsRepository = () => Connection<ExerciseStep>("ExerciseSteps");
+const ExerciseStepsConnection = () => Connection<ExerciseStep>("ExerciseSteps");
 
-export const ExerciseStepController = new ExerciseStepControllerClass(ExerciseStepsRepository);
+export const ExerciseStepRepository = new ExerciseStepRepositoryClass(ExerciseStepsConnection);

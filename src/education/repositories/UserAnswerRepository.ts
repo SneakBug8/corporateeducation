@@ -3,7 +3,7 @@ import { EntityFactory } from "../../entity/EntityFactory";
 import { Connection } from "../../Database";
 import { UserAnswer } from "../entities/UserAnswer";
 
-class UserAnswerControllerClass<T extends Entity> extends EntityFactory<T> {
+class UserAnswerRepositoryClass<T extends Entity> extends EntityFactory<T> {
     
     public async GetUnmarked() {
         const entries = await this.Repository().where("marked", `0`).select();
@@ -36,5 +36,5 @@ class UserAnswerControllerClass<T extends Entity> extends EntityFactory<T> {
     }
 }
 
-const AnswersRepository = () => Connection<UserAnswer>("Answers");
-export const UserAnswerController = new UserAnswerControllerClass<UserAnswer>(AnswersRepository);
+const AnswersConnection = () => Connection<UserAnswer>("Answers");
+export const UserAnswerRepository = new UserAnswerRepositoryClass<UserAnswer>(AnswersConnection);

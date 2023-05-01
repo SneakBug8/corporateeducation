@@ -1,29 +1,29 @@
 import { WebApi } from "../api/web";
-import { ExerciseStepController } from "./controllers/ExerciseStepController";
-import { ExerciseController } from "./controllers/ExerciseController";
-import { ExerciseRunController } from "./controllers/ExerciseRunController";
+import { ExerciseStepRepository } from "./repositories/ExerciseStepRepository";
+import { ExerciseRepository } from "./repositories/ExerciseRepository";
+import { ExerciseRunRepository } from "./repositories/ExerciseRunRepository";
 import { CRUDRouter } from "../api/CRUDRouter";
-import { GroupController } from "./controllers/GroupController";
-import { UserAnswerController } from "./controllers/UserAnswerController";
+import { GroupRepository } from "./repositories/GroupRepository";
+import { UserAnswerRepository } from "./repositories/UserAnswerRepository";
 import { EducationService } from "./EducationService";
 import { AuthService } from "../users/AuthService";
 import { WebResponse } from "../web/WebResponse";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { MyLogger } from "../util/MyLogger";
 
-class EducationWebServiceClass {
+class EducationControllerClass {
     public Init() {
-        const exerciserouter = new CRUDRouter("exercises", ExerciseController);
+        const exerciserouter = new CRUDRouter("exercises", ExerciseRepository);
         WebApi.app.use("/api/exercises", exerciserouter.GetRouter());
-        const steprouter = new CRUDRouter("steps", ExerciseStepController);
+        const steprouter = new CRUDRouter("steps", ExerciseStepRepository);
         WebApi.app.use("/api/steps", steprouter.GetRouter());
-        const runrouter = new CRUDRouter("runs", ExerciseRunController);
+        const runrouter = new CRUDRouter("runs", ExerciseRunRepository);
         WebApi.app.use("/api/runs", runrouter.GetRouter());
 
-        const grouprouter = new CRUDRouter("groups", GroupController);
+        const grouprouter = new CRUDRouter("groups", GroupRepository);
         WebApi.app.use("/api/groups", grouprouter.GetRouter());
 
-        const answerrouter = new CRUDRouter("answers", UserAnswerController);
+        const answerrouter = new CRUDRouter("answers", UserAnswerRepository);
         WebApi.app.use("/api/answers", answerrouter.GetRouter());
 
         WebApi.app.get("/api/getcontent/:id", async (req, res) => {
@@ -35,13 +35,13 @@ class EducationWebServiceClass {
                     return res.json(new WebResponse(false, ResponseTypes.NoTokenProvided).copy());
                 }
 
-                const userId = await AuthService.RetrieveByToken(token as string);
+                const user = await AuthService.RetrieveByToken(token as string);
 
-                if (!userId) {
+                if (!user || !user.id) {
                     return res.json(new WebResponse(false, ResponseTypes.NotAuthorized).copy());
                 }
 
-                const r = await EducationService.GetTaskContent(userId, exerciseId);
+                const r = await EducationService.GetTaskContent(user.id, exerciseId);
 
                 // const rdata = new WebResponse(true, ResponseTypes.OK).SetData(r);
 
@@ -66,13 +66,13 @@ class EducationWebServiceClass {
                     return res.json(new WebResponse(false, ResponseTypes.WrongRequestSignature).copy());
                 }
 
-                const userId = await AuthService.RetrieveByToken(token as string);
+                const user = await AuthService.RetrieveByToken(token as string);
 
-                if (!userId) {
+                if (!user || !user.id) {
                     return res.json(new WebResponse(false, ResponseTypes.NotAuthorized).copy());
                 }
 
-                const r = await EducationService.PassStep(userId, exerciseId, answer);
+                const r = await EducationService.PassStep(user.id, exerciseId, answer);
 
                 res.json(r.copy());
             }
@@ -84,4 +84,4 @@ class EducationWebServiceClass {
 
 }
 
-export const EducationWebService = new EducationWebServiceClass();
+export const EducationWebService = new EducationControllerClass();

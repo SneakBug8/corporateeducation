@@ -66,17 +66,9 @@ const CreateRelatedButton = () => {
     );
 };
 
-export const ExerciseEdit = (props: any) => (
-    <Edit title={<ExerciseTitle />} {...props}>
-        <SimpleForm toolbar={<CustomToolbar {...props} />}>
-            <TextInput disabled source="id" />
-            <TextInput validate={[required()]} source="name" />
-            <TextInput source="previousexercises" />
-            <BooleanInput source="public" looseValue={true} />
-            <DateInput disabled source="MIS_DT" />
-            <DateInput disabled source="UPDATED_DT" />
-            <h2>Exercise Steps</h2>
-            <ReferenceManyField label="Steps" reference="steps" target="exercise">
+
+const ChildrenSteps = (props: any) => (
+    <ReferenceManyField label="Steps" reference="steps" target="exercise">
                 <CreateRelatedButton />
                 <Datagrid>
                     <TextField source="id" />
@@ -89,6 +81,19 @@ export const ExerciseEdit = (props: any) => (
                     <EditButton />
                 </Datagrid>
             </ReferenceManyField>
+);
+
+export const ExerciseEdit = (props: any) => (
+    <Edit title={<ExerciseTitle />} {...props}>
+        <SimpleForm toolbar={<CustomToolbar {...props} />}>
+            <TextInput disabled source="id" />
+            <TextInput validate={[required()]} source="name" />
+            <TextInput source="previousexercises" />
+            <BooleanInput source="public" looseValue={true} />
+            <DateInput disabled source="MIS_DT" />
+            <DateInput disabled source="UPDATED_DT" />
+            <h2>Exercise Steps</h2>
+            <ChildrenSteps {...props} />
         </SimpleForm>
     </Edit>
 );

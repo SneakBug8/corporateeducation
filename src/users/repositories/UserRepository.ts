@@ -4,7 +4,7 @@ import { EntityFactory } from "../../entity/EntityFactory";
 import { ResponseTypes } from "../../web/ResponseTypes";
 import { User, UserRole } from "../User";
 
-class UserControllerClass extends EntityFactory<User> {
+class UserRepositoryClass extends EntityFactory<User> {
     public async GetWithGroup(groupid: number) {
         const entries = await this.Repository().where("group", "LIKE", `%${groupid}%`).select();
 
@@ -42,5 +42,5 @@ class UserControllerClass extends EntityFactory<User> {
     }
 }
 
-const UsersRepository = () => Connection<User>("Users");
-export const UserController = new UserControllerClass(UsersRepository);
+const UsersConnection = () => Connection<User>("Users");
+export const UserRepository = new UserRepositoryClass(UsersConnection);

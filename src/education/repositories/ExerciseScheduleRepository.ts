@@ -3,7 +3,7 @@ import { EntityFactory } from "../../entity/EntityFactory";
 import { Connection } from "../../Database";
 import { ExerciseSchedule } from "../entities/ExerciseSchedule";
 
-class ExerciseScheduleControllerClass<T extends Entity> extends EntityFactory<T> {
+class ExerciseScheduleRepositoryClass<T extends Entity> extends EntityFactory<T> {
     public async GetWithExercise(exercise: number) {
         const entries = await this.Repository().where("exerciseId", "LIKE", `%${exercise}%`).select();
 
@@ -18,6 +18,6 @@ class ExerciseScheduleControllerClass<T extends Entity> extends EntityFactory<T>
         return entry;
     }
 }
-const ExerciseSchedulesRepository = () => Connection<ExerciseSchedule>("ExerciseSchedules");
-export const ExerciseScheduleController =
-    new ExerciseScheduleControllerClass<ExerciseSchedule>(ExerciseSchedulesRepository);
+const ExerciseSchedulesConnection = () => Connection<ExerciseSchedule>("ExerciseSchedules");
+export const ExerciseScheduleRepository =
+    new ExerciseScheduleRepositoryClass<ExerciseSchedule>(ExerciseSchedulesConnection);

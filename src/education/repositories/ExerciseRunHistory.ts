@@ -9,5 +9,5 @@ class ExerciseRunHistoryClass extends EntityFactory<ExerciseRun> {
     }
 }
 
-const RunsHistoryRepository = () => Connection<ExerciseRun>("RunsHistory").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.user");
-export const ExerciseRunHistory = new ExerciseRunHistoryClass(RunsHistoryRepository);
+const RunsHistoryConnection = () => Connection<ExerciseRun>("RunsHistory").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.user");
+export const ExerciseRunHistoryRepository = new ExerciseRunHistoryClass(RunsHistoryConnection);

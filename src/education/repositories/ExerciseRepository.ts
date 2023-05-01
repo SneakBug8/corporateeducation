@@ -3,9 +3,9 @@ import { Entity } from "../../entity/Entity";
 import { EntityFactory } from "../../entity/EntityFactory";
 import { Exercise } from "../entities/Exercise";
 import { ExerciseDependency } from "../entities/ExerciseDependency";
-import { ExerciseDependencyController } from "./ExerciseDependencyController";
+import { ExerciseDependencyRepository } from "./ExerciseDependencyRepository";
 
-class ExerciseControllerClass extends EntityFactory<Exercise> {
+class ExerciseRepositoryClass extends EntityFactory<Exercise> {
     public async GetPreviousIDs(exercise: Exercise) {
         /*if (!exercise.previousexercises) {
             return [];
@@ -24,7 +24,7 @@ class ExerciseControllerClass extends EntityFactory<Exercise> {
             return [];
         }
 
-        const prevs = await ExerciseDependencyController.GetWithExercise(exercise.id);
+        const prevs = await ExerciseDependencyRepository.GetWithExercise(exercise.id);
 
         const res = [];
 
@@ -64,7 +64,7 @@ class ExerciseControllerClass extends EntityFactory<Exercise> {
             spl = exercise.previousexercises.split(",").map((x) => Number.parseInt(x, 10));
         }
 
-        const allExisting = await ExerciseDependencyController.GetWithExercise(exercise.id);
+        const allExisting = await ExerciseDependencyRepository.GetWithExercise(exercise.id);
 
         //console.log(`Want to have dependencies ${JSON.stringify(spl)}`);
         // Remove all extra
@@ -75,13 +75,13 @@ class ExerciseControllerClass extends EntityFactory<Exercise> {
             }
             if (!spl.includes(e.prevExerciseId)) {
                 //console.log(`Deleting dependency between ${e.exerciseId} and ${e.prevExerciseId}`);
-                await ExerciseDependencyController.Delete(e.id);
+                await ExerciseDependencyRepository.Delete(e.id);
             }
         }
 
         // Add new ones
         for (const s of spl) {
-            const existing = await ExerciseDependencyController.GetWithExerciseAndPrev(exercise.id, s);
+            const existing = await ExerciseDependencyRepository.GetWithExerciseAndPrev(exercise.id, s);
 
             if (existing) {
                 continue;
@@ -93,7 +93,7 @@ class ExerciseControllerClass extends EntityFactory<Exercise> {
 
             //console.log(`Creating dependency between ${dependency.exerciseId} and ${dependency.prevExerciseId}`);
 
-            await ExerciseDependencyController.Insert(dependency);
+            await ExerciseDependencyRepository.Insert(dependency);
         }
     }
 
@@ -106,5 +106,5 @@ class ExerciseControllerClass extends EntityFactory<Exercise> {
     }
 }
 
-const ExercisesRepository = () => Connection<Exercise>("Exercises");
-export const ExerciseController = new ExerciseControllerClass(ExercisesRepository);
+const ExercisesConnection = () => Connection<Exercise>("Exercises");
+export const ExerciseRepository = new ExerciseRepositoryClass(ExercisesConnection);

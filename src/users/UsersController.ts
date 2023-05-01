@@ -3,13 +3,13 @@ import * as express from "express";
 import { Logger } from "winston";
 import { ParseAdminQuery } from "../api/AdminQuery";
 import { User } from "./User";
-import { UserController } from "./controllers/UserController";
+import { UserRepository } from "./repositories/UserRepository";
 import { WebResponse } from "../web/WebResponse";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { AuthService } from "./AuthService";
 import { ToMD5 } from "../util/ToMd5";
 
-class UsersWebServiceClass {
+class UsersController {
     public Init() {
         WebApi.app.get("/api/auth", this.onAuth);
 
@@ -44,7 +44,7 @@ class UsersWebServiceClass {
 
     public async onUserGet(req: express.Request, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
-        const r = await UserController.GetById(id);
+        const r = await UserRepository.GetById(id);
 
         if (r) {
             r.password = "";
@@ -56,7 +56,7 @@ class UsersWebServiceClass {
     public async onUserInsert(req: express.Request, res: express.Response) {
         const exercise = req.body as User;
 
-        const r = await UserController.Insert(exercise);
+        const r = await UserRepository.Insert(exercise);
 
         res.json(r);
     }
@@ -72,22 +72,22 @@ class UsersWebServiceClass {
             t.password = undefined;
         }
 
-        const r = await UserController.Update(t);
+        const r = await UserRepository.Update(t);
         res.json(r);
     }
 
     public async onUserDelete(req: express.Request, res: express.Response) {
         const id = Number.parseInt(req.params.id, 10);
-        const r = await UserController.Delete(id);
+        const r = await UserRepository.Delete(id);
         res.json({ id: r });
     }
 
     public async onGetUsers(req: express.Request, res: express.Response) {
         try {
-            const r = await UserController.GetMany(req.query);
+            const r = await UserRepository.GetMany(req.query);
 
             const adminquery = ParseAdminQuery(req.query);
-            const count = await UserController.Count();
+            const count = await UserRepository.Count();
 
             if (r) {
                 r.forEach((x) => x.password = "");
@@ -104,4 +104,4 @@ class UsersWebServiceClass {
 
 }
 
-export const UsersWebService = new UsersWebServiceClass();
+export const UsersWebService = new UsersController();

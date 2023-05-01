@@ -1,6 +1,5 @@
 // in src/admin/index.tsx
 import { Admin, Resource, ListGuesser } from "react-admin";
-import jsonServerProvider from "ra-data-json-server";
 import restProvider from "ra-data-simple-rest";
 import { ExercisesList, ExerciseEdit, ExerciseCreate } from "./resources/Exercises";
 import { authProvider } from "./authProvider";
@@ -36,7 +35,9 @@ const App = () => (
     create={ExerciseStepCreate}
     recordRepresentation={(r) => `step ${r.stepnumber} of exercise ${r.exercise}`}
     icon={AssessmentIcon}/>
-    <Resource name="runs" list={ExerciseRunsList} edit={ExerciseRunEdit} create={ExerciseRunCreate} />
+    <Resource name="runs" list={ExerciseRunsList}
+    edit={ExerciseRunEdit}
+    create={ExerciseRunCreate} />
     <Resource name="groups" list={GroupsList}
     edit={GroupEdit} create={GroupCreate}
     recordRepresentation="name"
@@ -44,14 +45,18 @@ const App = () => (
     <Resource name="answers" list={UserAnswersList}
     edit={UserAnswerEdit} create={UserAnswerCreate} 
     icon={GradingIcon}/>
-    <Resource name="users" list={UsersList} edit={UserEdit} create={UserCreate} recordRepresentation="username" icon={UserIcon} />
+    <Resource name="users" list={UsersList}
+    edit={UserEdit} create={UserCreate}
+    recordRepresentation="username" icon={UserIcon} />
     <Resource name="leagues" list={LeaguesList}
     edit={LeagueEdit} create={LeagueCreate}
     recordRepresentation="name"
     icon={LeaderboardIcon} />
     <Resource icon={EmojiEventsIcon} name="achievements" list={UsersList}  />
-    <Resource name="feedback" list={UsersList} icon={FeedbackIcon}  />
-    <Resource name="notifications" list={UsersList} icon={NotificationsIcon}/>
+    <Resource name="feedback"
+    list={UsersList} icon={FeedbackIcon}  />
+    <Resource name="notifications"
+    list={UsersList} icon={NotificationsIcon}/>
 
   </Admin>
 );

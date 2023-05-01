@@ -1,9 +1,9 @@
 import { EntityFactory } from "../../entity/EntityFactory";
 import { Connection } from "../../Database";
 import { ExerciseRun } from "../entities/ExerciseRun";
-import { ExerciseRunHistory } from "./ExerciseRunHistory";
+import { ExerciseRunHistoryRepository } from "./ExerciseRunHistory";
 
-class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
+class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
     public async GetWithUser(userId: number) {
         const entries = await this.Repository().where("user", userId).select();
         return entries;
@@ -41,7 +41,7 @@ class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
         const r = await super.Insert(exercise);
 
         exercise.id = undefined;
-        ExerciseRunHistory.Insert(exercise);
+        ExerciseRunHistoryRepository.Insert(exercise);
 
         return r;
     }
@@ -50,11 +50,11 @@ class ExerciseRunControllerClass extends EntityFactory<ExerciseRun> {
         const r = await super.Update(exercise);
 
         exercise.id = undefined;
-        ExerciseRunHistory.Insert(exercise);
+        ExerciseRunHistoryRepository.Insert(exercise);
 
         return r;
     }
 }
 
-const RunsRepository = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.userId");
-export const ExerciseRunController = new ExerciseRunControllerClass(RunsRepository);
+const RunsConnection = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.userId");
+export const ExerciseRunRepository = new ExerciseRunRepositoryClass(RunsConnection);

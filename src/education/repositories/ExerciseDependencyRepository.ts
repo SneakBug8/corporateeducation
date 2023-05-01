@@ -5,7 +5,7 @@ import { Exercise } from "../entities/Exercise";
 import { ExerciseDependency } from "../entities/ExerciseDependency";
 
 
-class ExerciseDependencyControllerClass<T extends Entity> extends EntityFactory<T> {
+class ExerciseDependencyRepositoryClass<T extends Entity> extends EntityFactory<T> {
     
     public async GetWithExercise(exerciseId: number) {
         const entries = await this.Repository().where("exerciseId", exerciseId).select();
@@ -21,5 +21,5 @@ class ExerciseDependencyControllerClass<T extends Entity> extends EntityFactory<
 }
 
 
-const repository = () => Connection<ExerciseDependency>("ExerciseDependencies");
-export const ExerciseDependencyController = new ExerciseDependencyControllerClass<ExerciseDependency>(repository);
+const DependenciesConnection = () => Connection<ExerciseDependency>("ExerciseDependencies");
+export const ExerciseDependencyRepository = new ExerciseDependencyRepositoryClass<ExerciseDependency>(DependenciesConnection);

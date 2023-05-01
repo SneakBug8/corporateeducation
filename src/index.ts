@@ -10,11 +10,10 @@ import { ErrorLogger } from "./util/ErrorLogger";
 import { SyncEvent } from "./util/SyncEvent";
 import { MessageWrapper } from "./MessageWrapper";
 
-
-import { EducationWebService } from "./education/EducationWebService";
-import { UsersWebService } from "./users/UsersWebService";
-import { LeagueWebService } from "./leagues/LeagueWebService";
+import { EducationWebService } from "./education/EducationController";
+import { UsersWebService } from "./users/UsersController";
 import { AuthService } from "./users/AuthService";
+import { LeagueController } from "./leagues/LeagueController";
 
 
 let waitingCallback: ((message: MessageWrapper) => any) | null = null;
@@ -84,7 +83,7 @@ class App {
 */
         EducationWebService.Init();
         UsersWebService.Init();
-        LeagueWebService.Init();
+        LeagueController.Init();
 
         setInterval(this.Intervals.bind(this), 5 * 60 * 1000);
     }
