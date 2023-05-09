@@ -23,13 +23,18 @@ class EducationServiceClass extends EventEmitter {
     }
 
     public async GetTaskContent(userId: number, exerciseId: number) {
+        console.log(`UserId: ${userId} retrieving exercise content ${exerciseId}`);
         const t = await this.CanUserDoTask(userId, exerciseId);
 
         if (t.Is(false)) {
             return t;
         }
 
+        console.log("User can do task");
+
         const run = await this.EnsureRunObject(userId, exerciseId);
+
+        console.log("t2");
 
         const step = await ExerciseStepRepository.GetWithExerciseAndNumber(exerciseId, run.step);
 
@@ -44,6 +49,8 @@ class EducationServiceClass extends EventEmitter {
     public async CanUserDoTask(userId: number, exerciseId: number) {
         const exercise = await ExerciseRepository.GetById(exerciseId);
 
+        console.log(`Retrieved exercise ${exerciseId}`);
+
         if (!exercise) {
             return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
@@ -51,9 +58,14 @@ class EducationServiceClass extends EventEmitter {
         const prevs = await ExerciseRepository.GetPreviousIDs(exercise);
 
         if (prevs) {
+            console.log(`Previous exercises: ${prevs.length}`);
+
             for (const prev of prevs) {
+                console.log(`Previous exercise ${prev}`);
+
                 const r = await this.CheckEducationScheduleOnStart(userId, prev);
-                // console.log(`User ${userId} can ${r.Is(true)} do task ${prev}`);
+
+                console.log(`User ${userId} can ${r.Is(true)} do task ${prev}`);
 
                 if (r && !await this.DidUserFinishTask(userId, prev)) {
                     return new WebResponse(false, ResponseTypes.PreviousNotDone);
@@ -63,7 +75,7 @@ class EducationServiceClass extends EventEmitter {
 
         // Does the schedule allow this particular exercise
         const t = await this.CheckEducationScheduleOnStart(userId, exerciseId);
-        // console.log(`User ${userId} can ${t.Is(true)} do task ${exerciseId}`);
+        console.log(`User ${userId} can ${t.Is(true)} do task ${exerciseId}`);
 
         if (t.Is(false)) {
             return t;
@@ -224,12 +236,13 @@ class EducationServiceClass extends EventEmitter {
         }
         if (step.type === "input") {
             // Add storing of an answer for the future
-            const answer = new UserAnswer();
-            answer.exercise = exerciseId;
-            answer.step = stepno;
-            answer.user = userId;
-            answer.maxexperience = step.experience;
-            await UserAnswerRepository.Insert(answer);
+            const answobj = new UserAnswer();
+            answobj.exercise = exerciseId;
+            answobj.step = stepno;
+            answobj.answer = answer;
+            answobj.user = userId;
+            answobj.maxexperience = step.experience;
+            await UserAnswerRepository.Insert(answobj);
             return new WebResponse(true, ResponseTypes.CollectedAnswer);
         }
 
@@ -269,6 +282,8 @@ class EducationServiceClass extends EventEmitter {
     private async CheckEducationScheduleOnStart(userId: number, exerciseId: number) {
         const exercise = await ExerciseRepository.GetById(exerciseId);
 
+        console.log(`Exercise ${exerciseId} retrieved`);
+
         if (!exercise) {
             return new WebResponse(false, ResponseTypes.NoSuchExercise);
         }
@@ -279,10 +294,12 @@ class EducationServiceClass extends EventEmitter {
         }
 
         const user = await UserRepository.GetById(userId);
-
+        
         if (!user) {
             return new WebResponse(false, ResponseTypes.NoSuchUser);
         }
+
+        console.log(`User ${user.id} retrieved`);
 
         // If user doesn't belong to a group
         if (!user.group) {
@@ -290,7 +307,15 @@ class EducationServiceClass extends EventEmitter {
         }
 
         const run = await ExerciseRunRepository.GetWithUserAndExercise(userId, exerciseId);
+
+        if (run) {
+            console.log(`Run ${run.id} retrieved`);
+        }
+
         const schedule = await ExerciseScheduleRepository.GetWithExerciseAndGroup(exerciseId, user.group);
+
+        console.log(`Schedule ${user.id} retrieved`);
+
 
         if (!schedule) {
             return new WebResponse(false, ResponseTypes.TaskNotOpened);
@@ -365,6 +390,7 @@ class EducationServiceClass extends EventEmitter {
         if ((run.experience || 0) < (schedule.minExp || 0)) {
             return new WebResponse(false, ResponseTypes.NotEnoughXp);
         }
+        
 
         return new WebResponse(true, ResponseTypes.OK);
     }

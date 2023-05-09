@@ -56,7 +56,7 @@ const UserAnswerTitle = ({ record }: { record: UserAnswer } | any) => {
 
 const MaxExperience = () => {
     const record = useRecordContext();
-    return <p>Experience can't be higher than Max Experience for this step of {record.maxexperience}</p>;
+    return <p>Max Experience for this step is set as {record.maxexperience}</p>;
 };
 
 export const UserAnswerEdit = (props: any) => (
@@ -66,6 +66,9 @@ export const UserAnswerEdit = (props: any) => (
             <ReferenceInput disabled source="exercise" reference="exercises" />
             <TextInput disabled source="step" />
             <ReferenceInput disabled source="user" reference="users" />
+            <h3>User's answer</h3>
+            <TextInput disabled source="answer" />
+            <h3>Marks for the answer</h3>
             <MaxExperience />
             <NumberInput validate={[required()]} source="experience" />
             <BooleanInput source="marked" looseValue={true}/>

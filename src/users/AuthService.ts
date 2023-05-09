@@ -1,6 +1,8 @@
 import { Config } from "../config";
 import { MIS_DT } from "../util/MIS_DT";
 import { ToMD5 } from "../util/ToMd5";
+import { ResponseTypes } from "../web/ResponseTypes";
+import { WebResponse } from "../web/WebResponse";
 import { UserRepository } from "./repositories/UserRepository";
 
 interface ITokenEntry {
@@ -13,6 +15,18 @@ class AuthServiceClass {
     public chatId: number | undefined;
 
     public AuthenticatedTokens = new Array<ITokenEntry>();
+
+    public constructor() {
+        if (Config.isDev()) {
+            console.log(`Adding test token due to dev environment`);
+
+            this.AuthenticatedTokens.push({
+                login: "test83",
+                token: "entirelysecrettoken",
+                liveuntil: MIS_DT.GetExact() + MIS_DT.OneDay()
+            })
+        }
+    }
 
     public async CreateToken(login: string) {
         if (!await UserRepository.HasByLogin(login)) {
@@ -34,7 +48,7 @@ class AuthServiceClass {
     }
 
     public async RetrieveByToken(md5token: string) {
-        const suitable = this.AuthenticatedTokens.filter((x) => ToMD5(x.token) === md5token);
+        const suitable = this.AuthenticatedTokens.filter((x) => ToMD5(x.token) === md5token || (Config.isDev() && x.token === md5token));
         if (!suitable.length) {
             return null;
         }
@@ -74,19 +88,23 @@ class AuthServiceClass {
         this.AuthenticatedTokens = this.AuthenticatedTokens.filter((x) => !toremove.includes(x.token));
     }
 
-    public async TryAuthWeb(login: string, pswd: string): Promise<boolean> {
+    public async TryAuthWeb(login: string, pswd: string) {
         const user = await UserRepository.GetByLogin(login);
 
         if (!user) {
-            return false;
+            return new WebResponse(false, ResponseTypes.WrongLoginOrPassword);
+        }
+
+        if (user.blocked) {
+            return new WebResponse(false, ResponseTypes.BlockedByAdmin);
         }
 
         if (pswd === user.password || pswd === ToMD5(user.password || "")) {
             user.AUTHORIZED_DT = MIS_DT.GetExact();
             UserRepository.Update(user);
-            return true;
+            return new WebResponse(true, ResponseTypes.OK);
         }
-        return false;
+        return new WebResponse(false, ResponseTypes.WrongLoginOrPassword);
     }
 
     public TryAuthTelegram(pswd: string, chatId: number): boolean {

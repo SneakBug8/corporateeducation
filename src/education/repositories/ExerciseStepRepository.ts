@@ -14,7 +14,7 @@ class ExerciseStepRepositoryClass extends EntityFactory<ExerciseStep> {
     public async GetWithExercise(exercise: number) {
         const entries = await this.Repository().where("exercise", "LIKE", `%${exercise}%`).select();
 
-        return entries;
+        return entries as ExerciseStep[];
     }
 
     public async GetWithExerciseAndNumber(exercise: number, step: number) {

@@ -12,6 +12,8 @@ export class User extends Entity {
     public password: string | undefined;
     public role: number | undefined = 0;
     public group: number | undefined;
+    public company: string = "";
+    public blocked: number | undefined = 0;
     public AUTHORIZED_DT = MIS_DT.GetExact();
     public DEAUTHORIZED_DT = MIS_DT.GetExact();
     public timeonline: number | undefined = 0;

@@ -5,12 +5,12 @@ import { ExerciseRunHistoryRepository } from "./ExerciseRunHistory";
 
 class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
     public async GetWithUser(userId: number) {
-        const entries = await this.Repository().where("user", userId).select();
+        const entries = await this.Repository().where("userId", userId).select();
         return entries;
     }
 
     public async GetWithUserAndDate(userId: number, startDt: number, endDt: number) {
-        const entries = await this.Repository().where("user", userId)
+        const entries = await this.Repository().where("userId", userId)
             .andWhere("FINISHED_DT", ">", startDt)
             .andWhere("FINISHED_DT", "<", endDt)
             .select();
@@ -18,21 +18,24 @@ class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
     }
 
     public async GetWithExercise(id: number) {
-        const entries = await this.Repository().where("exercise", "LIKE", `%${id}%`).select();
+        const entries = await this.Repository().where("exerciseId", "LIKE", `%${id}%`).select();
         return entries;
     }
 
     public async GetWithUserAndExercise(userId: number, exerciseId: number) {
-        const entries = await this.Repository().where("user", "LIKE", `%${userId}%`)
-            .andWhere("exercise", "LIKE", `%${exerciseId}%`)
+
+        const entries = await this.Repository().where("userId", userId)
+            .andWhere("exerciseId", "LIKE", `%${exerciseId}%`)
             .orderBy("trynumber", "desc").select();
+
+            
         if (entries.length) {
             return entries[0] as ExerciseRun;
         }
     }
 
     public async Cleanup(t: ExerciseRun) {
-        delete (t as any).userId;
+        delete (t as any).userId2;
         delete (t as any).userGroup;
         return t;
     }
@@ -56,5 +59,5 @@ class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
     }
 }
 
-const RunsConnection = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId, `group` as userGroup from Users) as a on a.userId = Runs.userId");
+const RunsConnection = () => Connection<ExerciseRun>("Runs").joinRaw("left join (select `id` as userId2, `group` as userGroup from Users) as a on a.userId2 = Runs.userId");
 export const ExerciseRunRepository = new ExerciseRunRepositoryClass(RunsConnection);

@@ -31,8 +31,8 @@ class UsersController {
 
         const r = await AuthService.TryAuthWeb(login, password);
 
-        if (!r) {
-            return res.json(new WebResponse(false, ResponseTypes.WrongLoginOrPassword).copy());
+        if (!r.Is(true)) {
+            return res.json(r.copy());
         }
 
         const token = await AuthService.CreateToken(login);

@@ -1,7 +1,7 @@
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField,
     EditButton, TextInput, Toolbar, SaveButton, DeleteButton, usePermissions,
-    ReferenceInput, AutocompleteInput, ReferenceField, DateField, DateInput, FilterButton, required, SelectInput, SelectField
+    ReferenceInput, AutocompleteInput, ReferenceField, DateField, DateInput, FilterButton, required, SelectInput, SelectField, BooleanField, BooleanInput
 } from "react-admin";
 import { User } from "../entities/User";
 import { ManagerLimitedActions } from "../util/Common";
@@ -52,6 +52,8 @@ export const UsersList = (props: any) => (
               { id: 1, name: "Trainer" },
               { id: 2, name: "Administrator" },
             ]} />
+            <TextField source="company" />
+            <BooleanField source="blocked" looseValue={true}/>
             <ReferenceField source="group" reference="groups" />
             <DateField source="AUTHORIZED_DT" />
             <DateField source="MIS_DT" />
@@ -78,6 +80,8 @@ export const UserEdit = (props: any) => (
               { id: 2, name: "Administrator" },
             ]} />
             <ReferenceInput source="group" reference="groups" />
+            <TextInput source="company" />
+            <BooleanInput source="blocked" looseValue={true}/>
             <TextInput disabled source="timeonline" />
             <DateInput disabled source="AUTHORIZED_DT" />
             <DateInput disabled source="DEAUTHORIZED_DT" />
@@ -100,6 +104,7 @@ export const UserCreate = (props: any) => (
               { id: 2, name: "Administrator" },
             ]} />
             <ReferenceInput source="group" reference="groups" />
+            <TextInput source="company" />
         </SimpleForm>
     </Create>
 );
