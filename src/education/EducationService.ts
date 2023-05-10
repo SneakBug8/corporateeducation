@@ -12,6 +12,8 @@ import { UserAnswerRepository } from "./repositories/UserAnswerRepository";
 import { ExerciseScheduleRepository } from "./repositories/ExerciseScheduleRepository";
 import { UserRepository } from "../users/repositories/UserRepository";
 import { IExerciseContent } from "./entities/ExerciseStep";
+import { UserExperienceHistory } from "./entities/UserExperienceHistory";
+import { UserExperienceHistoryRepository } from "./repositories/UserExperienceHistory";
 
 class EducationServiceClass extends EventEmitter {
 
@@ -235,12 +237,11 @@ class EducationServiceClass extends EventEmitter {
             }
         }
         if (step.type === "input") {
-            // Add storing of an answer for the future
             const answobj = new UserAnswer();
-            answobj.exercise = exerciseId;
+            answobj.exerciseId = exerciseId;
             answobj.step = stepno;
             answobj.answer = answer;
-            answobj.user = userId;
+            answobj.userId = userId;
             answobj.maxexperience = step.experience;
             await UserAnswerRepository.Insert(answobj);
             return new WebResponse(true, ResponseTypes.CollectedAnswer);
@@ -261,10 +262,36 @@ class EducationServiceClass extends EventEmitter {
         const answers = await UserAnswerRepository.GetWithUser(userId);
 
         for (const answer of answers) {
-            res += answer.experience || 0;
+            if (answer.marked) {
+                res += answer.experience || 0;
+            }
         }
 
         return res;
+    }
+
+    public async RecordUserTotalExperience(userId: number, source: string | undefined) {
+        const runs = await ExerciseRunRepository.GetWithUser(userId);
+
+        const history = new UserExperienceHistory();
+        history.userId = userId;
+        history.source = source;
+
+        for (const run of runs) {
+            history.runsExperience += run.experience || 0;
+        }
+
+        const answers = await UserAnswerRepository.GetWithUser(userId);
+
+        for (const answer of answers) {
+            if (answer.marked) {
+                history.answersExperience += answer.experience || 0;
+            }
+        }
+
+        history.totalExperience = history.runsExperience + history.answersExperience;
+
+        await UserExperienceHistoryRepository.Insert(history);
     }
 
     public async MarkAnswer(userId: number, exerciseId: number, stepno: number, experience: number) {

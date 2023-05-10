@@ -35,6 +35,8 @@ export class LeaguesService {
                 continue;
             }
 
+            // TODO: Incorporate UserAnswer experience source
+            
             const eligibleRuns = await ExerciseRunRepository.GetWithUserAndDate(user.id, league.starts, league.ends);
 
             const xpsum = eligibleRuns.filter((x) => x.finished)
@@ -61,6 +63,8 @@ export class LeaguesService {
 
         if (leaderboard.length) {
             league.winner = leaderboard[0].userId;
+
+            league.hasfinished = true;
         }
 
         await LeagueRepository.Update(league);

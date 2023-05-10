@@ -8,16 +8,20 @@ import { WebResponse } from "../web/WebResponse";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { AuthService } from "./AuthService";
 import { ToMD5 } from "../util/ToMd5";
+import { CRUDRouter } from "../api/CRUDRouter";
 
 class UsersController {
     public Init() {
         WebApi.app.get("/api/auth", this.onAuth);
 
-        WebApi.app.get("/api/users/:id", this.onUserGet);
+        /*WebApi.app.get("/api/users/:id", this.onUserGet);
         WebApi.app.post("/api/users", this.onUserInsert);
         WebApi.app.put("/api/users/:id", this.onUserUpdate);
         WebApi.app.delete("/api/users/:id", this.onUserDelete);
-        WebApi.app.all("/api/users", this.onGetUsers);
+        WebApi.app.all("/api/users", this.onGetUsers);*/
+
+        const userrouter = new CRUDRouter("users", UserRepository);
+        WebApi.app.use("/api/users", userrouter.GetRouter());
     }
 
     public async onAuth(req: express.Request, res: express.Response) {

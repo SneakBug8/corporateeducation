@@ -25,3 +25,16 @@ export const ManagerLimitedActions = ({ children, ...props }: any) =>
     </TopToolbar>
   );
 };
+
+
+export const ReadonlyActions = ({ children, ...props }: any) =>
+{
+  const { permissions } = usePermissions();
+
+  return (
+    <TopToolbar>
+      {children}
+      <ExportButton />
+    </TopToolbar>
+  );
+};

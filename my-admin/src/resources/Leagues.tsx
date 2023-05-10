@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField, EditButton, TextInput, Toolbar, SaveButton, DeleteButton,
     usePermissions, FilterButton, DateField, DateInput, ReferenceInput,
-    ReferenceField, useRecordContext, useDataProvider
+    ReferenceField, useRecordContext, useDataProvider, BooleanField, BooleanInput
 } from "react-admin";
 import { ExerciseModel } from "../entities/ExerciseModel";
 import { ManagerLimitedActions } from "../util/Common";
@@ -23,7 +23,8 @@ export const LeaguesList = (props: any) => (
             <TextField source="id" />
             <TextField source="name" />
             <ReferenceField source="group" reference="groups" />
-            <TextField source="winner" />
+            <BooleanField source="hasfinished" looseValue={true} />
+            <ReferenceField source="winner" reference="users" />
             <DateField source="starts" />
             <DateField source="ends" />
             <DateField source="MIS_DT" />
@@ -87,6 +88,7 @@ const MyEdit = (props: any) => {
         <ReferenceInput source="group" reference="groups" disabled={record.winner}/>
         <DateInput source="starts" disabled={record.winner} />
         <DateInput source="ends" disabled={record.winner} />
+        <BooleanInput disabled source="hasfinished" looseValue={true} />
         <DateInput disabled source="MIS_DT" />
         <DateInput disabled source="UPDATED_DT" />
         <LeagueTop />

@@ -21,8 +21,8 @@ const CustomToolbar = ({ ...props }: any) => {
 // Filters
 const postFilters = [
     <TextInput label="Id" source="id" alwaysOn />,
-    <ReferenceInput label="User" source="user" reference="users"/>,
-    <ReferenceInput label="Exercise" source="exercise" reference="exercises" />,
+    <ReferenceInput label="User" source="userId" reference="users"/>,
+    <ReferenceInput label="Exercise" source="exerciseId" reference="exercises" />,
     <BooleanInput source="marked" looseValue={true}/>
 ];
 
@@ -37,8 +37,8 @@ export const UserAnswersList = (props: any) => (
     <List {...props} actions={<MyActions />} filters={postFilters}>
         <Datagrid>
             <TextField source="id" />
-            <ReferenceField source="exercise" reference="exercises" />
-            <ReferenceField source="user" reference="users" />
+            <ReferenceField source="exerciseId" reference="exercises" />
+            <ReferenceField source="userId" reference="users" />
             <TextField source="experience" />
             <BooleanField source="marked" looseValue={true} />
             <TextField source="step" />
@@ -63,11 +63,11 @@ export const UserAnswerEdit = (props: any) => (
     <Edit title={<UserAnswerTitle />} {...props}>
         <SimpleForm toolbar={<CustomToolbar {...props} />}>
             <TextInput disabled source="id" />
-            <ReferenceInput disabled source="exercise" reference="exercises" />
+            <ReferenceInput disabled source="exerciseId" reference="exercises" />
             <TextInput disabled source="step" />
-            <ReferenceInput disabled source="user" reference="users" />
+            <ReferenceInput disabled source="userId" reference="users" />
             <h3>User's answer</h3>
-            <TextInput disabled source="answer" />
+            <TextInput disabled source="answer" multiline />
             <h3>Marks for the answer</h3>
             <MaxExperience />
             <NumberInput validate={[required()]} source="experience" />
@@ -81,10 +81,10 @@ export const UserAnswerEdit = (props: any) => (
 export const UserAnswerCreate = (props: any) => (
     <Create title="Create an UserAnswer" {...props}>
         <SimpleForm>
-            <ReferenceInput source="exercise" reference="exercises">
+            <ReferenceInput source="exerciseId" reference="exercises">
                 <AutocompleteInput optionText="name" />
             </ ReferenceInput>
-            <ReferenceInput source="user" reference="users">
+            <ReferenceInput source="userId" reference="users">
                 <AutocompleteInput optionText="name" />
             </ ReferenceInput>
             <TextInput source="experience" />

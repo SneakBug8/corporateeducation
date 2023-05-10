@@ -13,4 +13,7 @@ export class ExerciseRun extends Entity {
     public RESTART_DT = MIS_DT.GetExact();
     public trynumber: number = 0;
     public mistakes: number = 0;
+
+    public userGroup: number = 0;
+
 }

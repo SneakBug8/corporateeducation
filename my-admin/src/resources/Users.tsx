@@ -1,7 +1,8 @@
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField,
     EditButton, TextInput, Toolbar, SaveButton, DeleteButton, usePermissions,
-    ReferenceInput, AutocompleteInput, ReferenceField, DateField, DateInput, FilterButton, required, SelectInput, SelectField, BooleanField, BooleanInput
+    ReferenceInput, AutocompleteInput,PasswordInput,
+    NumberField, ReferenceField, DateField, DateInput, FilterButton, required, SelectInput, SelectField, BooleanField, BooleanInput
 } from "react-admin";
 import { User } from "../entities/User";
 import { ManagerLimitedActions } from "../util/Common";
@@ -53,6 +54,7 @@ export const UsersList = (props: any) => (
               { id: 2, name: "Administrator" },
             ]} />
             <TextField source="company" />
+            <NumberField source="totalExperience"/>
             <BooleanField source="blocked" looseValue={true}/>
             <ReferenceField source="group" reference="groups" />
             <DateField source="AUTHORIZED_DT" />
@@ -73,12 +75,13 @@ export const UserEdit = (props: any) => (
             <TextInput disabled source="id" />
             <TextInput validate={[required()]} source="username" />
             <p><i>Fill in only if you want to replace the user's password:</i></p>
-            <TextInput source="password" />
+            <PasswordInput source="password" />
             <SelectInput source="role" validate={[required()]} choices={[
               { id: 0, name: "User" },
               { id: 1, name: "Trainer" },
               { id: 2, name: "Administrator" },
             ]} />
+            <TextInput source="email" />
             <ReferenceInput source="group" reference="groups" />
             <TextInput source="company" />
             <BooleanInput source="blocked" looseValue={true}/>
@@ -93,16 +96,17 @@ export const UserEdit = (props: any) => (
 );
 
 export const UserCreate = (props: any) => (
-    <Create title="Create an User" {...props}>
+    <Create title="Create a User" {...props}>
         <SimpleForm>
             <TextInput disabled source="id" />
             <TextInput validate={[required()]} source="username" />
-            <TextInput validate={[required()]} source="password" />
+            <PasswordInput validate={[required()]} source="password" />
             <SelectInput source="role" validate={[required()]} choices={[
               { id: 0, name: "User" },
               { id: 1, name: "Trainer" },
               { id: 2, name: "Administrator" },
             ]} />
+            <TextInput source="email" />
             <ReferenceInput source="group" reference="groups" />
             <TextInput source="company" />
         </SimpleForm>

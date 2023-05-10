@@ -10,6 +10,10 @@ import { AuthService } from "../users/AuthService";
 import { WebResponse } from "../web/WebResponse";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { MyLogger } from "../util/MyLogger";
+import { ExerciseScheduleRepository } from "./repositories/ExerciseScheduleRepository";
+import { UserExperienceHistory } from "./entities/UserExperienceHistory";
+import { UserExperienceHistoryRepository } from "./repositories/UserExperienceHistory";
+import { ExerciseRunHistoryRepository } from "./repositories/ExerciseRunHistory";
 
 class EducationControllerClass {
     public Init() {
@@ -20,11 +24,22 @@ class EducationControllerClass {
         const runrouter = new CRUDRouter("runs", ExerciseRunRepository);
         WebApi.app.use("/api/runs", runrouter.GetRouter());
 
+        
+        const schedulerouter = new CRUDRouter("schedules", ExerciseScheduleRepository);
+        WebApi.app.use("/api/schedules", schedulerouter.GetRouter());
+        
+
         const grouprouter = new CRUDRouter("groups", GroupRepository);
         WebApi.app.use("/api/groups", grouprouter.GetRouter());
 
         const answerrouter = new CRUDRouter("answers", UserAnswerRepository);
         WebApi.app.use("/api/answers", answerrouter.GetRouter());
+
+        const exphistrouter = new CRUDRouter("answers", UserExperienceHistoryRepository);
+        WebApi.app.use("/api/userexperiencehistory", exphistrouter.GetRouter());
+
+        const exrunhistrouter = new CRUDRouter("answers", ExerciseRunHistoryRepository);
+        WebApi.app.use("/api/exerciserunhistory", exrunhistrouter.GetRouter());
 
         WebApi.app.get("/api/getcontent/:id", async (req, res) => {
             try {

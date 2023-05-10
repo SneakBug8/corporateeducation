@@ -2,6 +2,7 @@ import { EntityFactory } from "../../entity/EntityFactory";
 import { Connection } from "../../Database";
 import { ExerciseRun } from "../entities/ExerciseRun";
 import { ExerciseRunHistoryRepository } from "./ExerciseRunHistory";
+import { EducationService } from "../EducationService";
 
 class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
     public async GetWithUser(userId: number) {
@@ -46,6 +47,8 @@ class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
         exercise.id = undefined;
         ExerciseRunHistoryRepository.Insert(exercise);
 
+        EducationService.RecordUserTotalExperience(exercise.userId, "exercise");
+
         return r;
     }
 
@@ -54,6 +57,8 @@ class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
 
         exercise.id = undefined;
         ExerciseRunHistoryRepository.Insert(exercise);
+
+        EducationService.RecordUserTotalExperience(exercise.userId, "exercise");
 
         return r;
     }

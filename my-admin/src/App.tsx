@@ -9,6 +9,7 @@ import { GroupCreate, GroupEdit, GroupsList } from "./resources/Groups";
 import { UserAnswersList, UserAnswerEdit, UserAnswerCreate } from "./resources/UserAnswers";
 import { UserCreate, UserEdit, UsersList } from "./resources/Users";
 import { LeagueCreate, LeagueEdit, LeaguesList } from "./resources/Leagues";
+import { SchedulesList, ScheduleEdit, ScheduleCreate } from "./resources/ExerciseSchedules";
 
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import UserIcon from '@mui/icons-material/People';
@@ -19,6 +20,10 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import GradingIcon from '@mui/icons-material/Grading';
+import { UserExperienceHistoryList } from "./resources/UserExperienceHistory";
+
+import DatasetIcon from '@mui/icons-material/Dataset';
+import { ExerciseRunHistory } from "./resources/ExerciseRunHistory";
 
 const dataProvider = restProvider("http://localhost:3000/api");
 // jsonServerProvider("https://jsonplaceholder.typicode.com");
@@ -48,6 +53,10 @@ const App = () => (
     <Resource name="users" list={UsersList}
     edit={UserEdit} create={UserCreate}
     recordRepresentation="username" icon={UserIcon} />
+     <Resource name="schedules" list={SchedulesList}
+    edit={ScheduleEdit} create={ScheduleCreate}
+    />
+
     <Resource name="leagues" list={LeaguesList}
     edit={LeagueEdit} create={LeagueCreate}
     recordRepresentation="name"
@@ -57,6 +66,11 @@ const App = () => (
     list={UsersList} icon={FeedbackIcon}  />
     <Resource name="notifications"
     list={UsersList} icon={NotificationsIcon}/>
+
+<Resource name="userexperiencehistory"
+    list={UserExperienceHistoryList} icon={DatasetIcon} options={{label: "User Experience History"}}/>
+<Resource name="exerciserunhistory"
+    list={ExerciseRunHistory} icon={DatasetIcon} options={{label: "Exercise Runs History"}}/>
 
   </Admin>
 );

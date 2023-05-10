@@ -13,6 +13,7 @@ import { Check } from "../../util/Check";
 import { MIS_DT } from "../../util/MIS_DT";
 import { Sleep } from "../../util/Sleep";
 import { WebResponse } from "../../web/WebResponse";
+import { UserRepository } from "../../users/repositories/UserRepository";
 
 async function interact(descr: string, fun: () => any) {
     const r = await fun();
@@ -76,7 +77,8 @@ describe("CheckExercise", () => {
         user.username = login;
         user.password = passw;
 
-        testuser = await User.Insert(user);
+        const t = await UserRepository.Insert(user);
+        testuser = t.id || 0;
     });
 
     it("CanDoTaskNegative", async () => {
@@ -168,14 +170,14 @@ describe("ExerciseSchedule", () => {
         assert.ok(r1.Is(false), "Task should be unavailable");
     });
     it("Add user to the group", async () => {
-        const user = await User.GetById(testuser);
+        const user = await UserRepository.GetById(testuser);
 
         if (!user) {
             throw Error("No such user");
         }
         user.group = testgroup;
 
-        await User.Update(user);
+        await UserRepository.Update(user);
     });
     it("User can't do a task with no schedule", async () => {
         const s = await ExerciseScheduleRepository.GetWithExerciseAndGroup(lockedexercise, testgroup);

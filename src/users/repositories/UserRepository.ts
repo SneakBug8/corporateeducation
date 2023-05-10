@@ -1,4 +1,6 @@
 import { Connection } from "../../Database";
+import { ConvertAdminQuery } from "../../api/AdminQuery";
+import { EducationService } from "../../education/EducationService";
 import { Entity } from "../../entity/Entity";
 import { EntityFactory } from "../../entity/EntityFactory";
 import { ResponseTypes } from "../../web/ResponseTypes";
@@ -21,6 +23,25 @@ class UserRepositoryClass extends EntityFactory<User> {
         return null;
     }
 
+    public async GetAll() {
+        const entries = await this.Repository().select(Connection.raw("Users.*, (runsExperience + answersExperience) as totalExperience"))
+        .joinRaw("left join (select userId, sum(experience) as runsExperience from Runs where finished = 1 group by userId) a on a.userId = id")
+        .joinRaw("left join (select userId, sum(experience) as answersExperience from Answers where marked = 1 group by userId) b on b.userId = id") as User[];
+
+        const r = entries.map((x) => this.Parse(x));
+
+        return r;
+    }
+
+    public async GetMany(query: any) {
+        const data = await ConvertAdminQuery(query, this.Repository().select(Connection.raw("Users.*, (runsExperience + answersExperience) as totalExperience"))
+        .joinRaw("left join (select userId, sum(experience) as runsExperience from Runs where finished = 1 group by userId) a on a.userId = id")
+        .joinRaw("left join (select userId, sum(experience) as answersExperience from Answers where marked = 1 group by userId) b on b.userId = id")) as User[];
+        const r = await Promise.all(data.map(async (x) => await this.Parse(x)));
+
+        return r;
+    }
+
     public async GetByLogin(name: string) {
         const entries = await this.Repository().where("username", "LIKE", `%${name}%`).select();
 
@@ -39,6 +60,26 @@ class UserRepositoryClass extends EntityFactory<User> {
         }
 
         return user.role || UserRole.Student >= role;
+    }
+
+    public async Insert(exercise: User): Promise<User> {
+        const r = await super.Insert(exercise);
+
+        if (r.id) {
+        EducationService.RecordUserTotalExperience(r.id, "usercreated");
+        }
+
+        return r;
+    }
+
+    public async Update(exercise: User): Promise<User> {
+        const r = await super.Update(exercise);
+
+        if (r.id) {
+        EducationService.RecordUserTotalExperience(r.id, "usercreated");
+        }
+
+        return r;
     }
 }
 

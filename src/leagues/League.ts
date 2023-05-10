@@ -4,6 +4,7 @@ import { MIS_DT } from "../util/MIS_DT";
 export class League extends Entity {
     public name: string | undefined;
     public group: number | undefined;
+    public hasfinished: boolean | undefined = false;
     public starts: number | undefined;
     public ends: number | undefined;
     public winner: number | undefined;
