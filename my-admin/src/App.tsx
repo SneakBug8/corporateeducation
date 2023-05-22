@@ -1,5 +1,5 @@
 // in src/admin/index.tsx
-import { Admin, Resource, ListGuesser } from "react-admin";
+import { Admin, Resource, ListGuesser, defaultTheme } from "react-admin";
 import restProvider from "ra-data-simple-rest";
 import { ExercisesList, ExerciseEdit, ExerciseCreate } from "./resources/Exercises";
 import { authProvider } from "./authProvider";
@@ -24,13 +24,31 @@ import { UserExperienceHistoryList } from "./resources/UserExperienceHistory";
 
 import DatasetIcon from '@mui/icons-material/Dataset';
 import { ExerciseRunHistory } from "./resources/ExerciseRunHistory";
+import { i18nProvider } from "./i18n/i18n";
 
 const dataProvider = restProvider("http://localhost:3000/api");
 // jsonServerProvider("https://jsonplaceholder.typicode.com");
 // list={ListGuesser}
 
+
+const theme = {
+  ...defaultTheme,
+  components: {
+      ...defaultTheme.components,
+      MuiTextField: {
+          styleOverrides: {
+            root: {
+                width: "100%",
+            }
+         }
+      }
+  }
+};
+
 const App = () => (
-  <Admin dataProvider={dataProvider} authProvider={authProvider}>
+  <Admin dataProvider={dataProvider} authProvider={authProvider} theme={theme}
+  i18nProvider={i18nProvider}
+  >
     <Resource name="exercises"
     list={ExercisesList} edit={ExerciseEdit}
     create={ExerciseCreate} recordRepresentation="name"
