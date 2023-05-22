@@ -73,7 +73,7 @@ export const ScheduleEdit = (props: any) => (
 
 
 export const ScheduleCreate = (props: any) => (
-    <Create title="Create an Exercise" {...props}>
+    <Create title="Create a Schedule" {...props}>
         <SimpleForm>
         <ReferenceInput source="groupId" reference="groups"/>
         <ReferenceInput source="exerciseId" reference="exercises"/>

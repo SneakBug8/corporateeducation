@@ -27,7 +27,6 @@ export const ExerciseRunHistory = (props: any) => (
             <ReferenceField source="userGroup" reference="groups" />
             <ReferenceField source="userId" reference="users" />
             <TextField source="experience" />
-            <TextField source="experience" />
             <TextField source="step" />
             <TextField source="trynumber" />
             <TextField source="mistakes" />

@@ -41,6 +41,8 @@ export const UserAnswersList = (props: any) => (
             <ReferenceField source="userId" reference="users" />
             <TextField source="experience" />
             <BooleanField source="marked" looseValue={true} />
+            <BooleanField source="outdated" looseValue={true} />
+
             <TextField source="step" />
 
             <DateField source="MIS_DT" showTime  />
@@ -72,6 +74,7 @@ export const UserAnswerEdit = (props: any) => (
             <MaxExperience />
             <NumberInput validate={[required()]} source="experience" />
             <BooleanInput source="marked" looseValue={true}/>
+            <BooleanInput disabled source="outdated" looseValue={true}/>
             <DateInput disabled source="MIS_DT" />
             <DateInput disabled source="UPDATED_DT" />
         </SimpleForm>

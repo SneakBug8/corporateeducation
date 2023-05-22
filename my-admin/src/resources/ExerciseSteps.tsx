@@ -68,7 +68,10 @@ const StepEditor = (props: any) => {
 
     const { field } = useController({ name: "content", defaultValue: "" });
 
-    const content = JSON.parse(field.value || "{}");
+    console.log(field);
+
+    // const content = JSON.parse(field.value || "{}");
+    const content = field.value;
 
     const [numOfAnswers, setNum ] = useState(content && content.answers && content.answers.length || 0);
     const generateArrays = [];
@@ -79,24 +82,23 @@ const StepEditor = (props: any) => {
 
     const onTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         content.text = event.target.value;
-        field.onChange(JSON.stringify(content));
+        field.onChange(content);
     };
     const onAnswersChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const v = event.target.value.split(",");
         content.answers = v;
-        field.onChange(JSON.stringify(content));
+        field.onChange(content);
     };
 
     const onAnswerChange = (id: number, s: string) => {
         content.answers[id] = s;
 
-        field.onChange(JSON.stringify(content));
+        field.onChange(content);
     };
 
     const onAnswerRemoved = () => {
         content.answers.pop();
-        field.onChange(JSON.stringify(content));
-
+        field.onChange(content);
 
         setNum(numOfAnswers- 1);
     }
@@ -109,21 +111,21 @@ const StepEditor = (props: any) => {
             />
             */
 
-    return (<div>
+    return (<>
         <h3>Step properties</h3>
-        <TF value={content.text} label={t === "video" ? "Video URL" : "Text"} multiline minRows={3} onChange={onTextChange} />
+        <TF sx={{width: "100%"}} value={content.text} label={t === "video" ? "Video URL" : "Text"} multiline minRows={3} onChange={onTextChange} />
         {t === "quiz" &&
-            <div>
+            <>
                 <TextInput source="correctAnswer" label="Correct answer" placeholder='a' />
 
                 <br/>
-                <Button variant="contained" onClick={() => setNum(numOfAnswers + 1)}>+</Button>
-                <Button variant="contained" onClick={onAnswerRemoved}>-</Button>
+                <div><Button variant="contained" onClick={() => setNum(numOfAnswers + 1)}>+</Button>
+                <Button variant="contained" onClick={onAnswerRemoved}>-</Button></div>
                 <br/>
-                <>{generateArrays.map(x => <QuizAnswer id={x} value={content.answers[x]} callback={onAnswerChange}/>)}</>
+                <>{generateArrays.map(x => <QuizAnswer id={x} key={x} value={content.answers[x]} callback={onAnswerChange}/>)}</>
                 <br />
-            </div>
-        }</div>);
+            </>
+        }</>);
 }
 
 type QuizProps = {id: number, value: string, callback: (id: number, s: string) => void};
