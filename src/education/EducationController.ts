@@ -77,9 +77,9 @@ class EducationControllerClass {
                     return res.json(new WebResponse(false, ResponseTypes.NoTokenProvided).copy());
                 }
 
-                if (!answer) {
+                /* if (!answer) {
                     return res.json(new WebResponse(false, ResponseTypes.WrongRequestSignature).copy());
-                }
+                } */
 
                 const user = await AuthService.RetrieveByToken(token as string);
 
@@ -87,7 +87,7 @@ class EducationControllerClass {
                     return res.json(new WebResponse(false, ResponseTypes.NotAuthorized).copy());
                 }
 
-                const r = await EducationService.PassStep(user.id, exerciseId, answer);
+                const r = await EducationService.PassStep(user.id, exerciseId, answer || "");
 
                 res.json(r.copy());
             }

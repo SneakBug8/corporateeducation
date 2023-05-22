@@ -3,44 +3,47 @@ import { MIS_DT } from "../util/MIS_DT";
 import { ToMD5 } from "../util/ToMd5";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { WebResponse } from "../web/WebResponse";
+import { User } from "./User";
 import { UserRepository } from "./repositories/UserRepository";
-
-interface ITokenEntry {
-    login: string;
-    token: string;
-    liveuntil: number;
-}
+import { TokenEntry, UserTokenRepository } from "./repositories/UserTokenRepository";
 
 class AuthServiceClass {
     public chatId: number | undefined;
 
-    public AuthenticatedTokens = new Array<ITokenEntry>();
+    public AuthenticatedTokens = new Array<TokenEntry>();
 
     public constructor() {
         if (Config.isDev()) {
             console.log(`Adding test token due to dev environment`);
 
-            this.AuthenticatedTokens.push({
-                login: "test83",
-                token: "entirelysecrettoken",
-                liveuntil: MIS_DT.GetExact() + MIS_DT.OneDay()
-            })
+            const token = new TokenEntry();
+            token.userId = 1;
+            token.token = "entirelysecrettoken"
+            token.liveuntil = MIS_DT.GetExact() + MIS_DT.OneDay()
+
+            UserTokenRepository.Insert(token);
         }
     }
 
-    public async CreateToken(login: string) {
-        if (!await UserRepository.HasByLogin(login)) {
+    public async CreateToken(userId: number) {
+        if (!await UserRepository.GetById(userId)) {
             throw new Error("No such User to create token");
         }
 
-        let token = "t" + Math.round(Math.random() * 11);
+        let token = "t" + Math.round(Math.random() * 100);
 
-        while (this.AuthenticatedTokens.filter((x) => x.token === token).length) {
-            token = "t" + Math.round(Math.random() * 11);
+        while (await UserTokenRepository.GetActiveWithToken(ToMD5(token))) {
+            token = "t" + Math.round(Math.random() * 99999);
         }
 
-        console.log(`Created session for ${login}`);
-        this.AuthenticatedTokens.push({ token, login, liveuntil: MIS_DT.GetExact() + MIS_DT.OneMinute() * 15 });
+        console.log(`Created session for ${userId}`);
+
+        const obj = new TokenEntry();
+        obj.userId = userId;
+        obj.token = ToMD5(token);
+        obj.liveuntil = MIS_DT.GetExact() + MIS_DT.OneMinute() * 15;
+
+        await UserTokenRepository.Insert(obj);
 
         const md5 = ToMD5(token);
 
@@ -48,15 +51,17 @@ class AuthServiceClass {
     }
 
     public async RetrieveByToken(md5token: string) {
-        const suitable = this.AuthenticatedTokens.filter((x) => ToMD5(x.token) === md5token || (Config.isDev() && x.token === md5token));
-        if (!suitable.length) {
-            return null;
+        const suitable = await UserTokenRepository.GetActiveWithToken(md5token);
+
+        if (!suitable || !suitable.userId) {
+            return;
         }
 
-        const login = suitable[0].login;
-        suitable[0].liveuntil = MIS_DT.GetExact() + MIS_DT.OneMinute() * 15;
+        const userId = suitable.userId;
+        suitable.liveuntil = MIS_DT.GetExact() + MIS_DT.OneMinute() * 15;
+        UserTokenRepository.Update(suitable);
 
-        const user = await UserRepository.GetByLogin(login);
+        const user = await UserRepository.GetById(userId);
 
         if (!user) {
             return null;
@@ -66,45 +71,52 @@ class AuthServiceClass {
     }
 
     public async ReviewTokens() {
-        const toremove = new Array<string>();
-        for (const entry of this.AuthenticatedTokens) {
+        const tokens = await UserTokenRepository.GetActive();
+
+        tokens.forEach(async (entry) => {
+            if (!entry.id) {
+                return;
+            }
+            if (!entry.liveuntil || !entry.userId) {
+                await UserTokenRepository.Delete(entry.id);
+                return;
+            }
             if (entry.liveuntil <= MIS_DT.GetExact()) {
-                const user = await UserRepository.GetByLogin(entry.login);
+                const user = await UserRepository.GetById(entry.userId);
 
                 if (!user) {
-                    continue;
+                    return;
                 }
 
                 user.DEAUTHORIZED_DT = MIS_DT.GetExact();
                 user.timeonline = (user.timeonline || 0) + user.DEAUTHORIZED_DT - user.AUTHORIZED_DT;
 
-                await UserRepository.Update(user);
-
-                toremove.push(entry.token);
+                UserRepository.Update(user);
+                
+                entry.active = false;
+                UserTokenRepository.Update(entry);
                 console.log(`Dropping session of ${user.username}`);
             }
-        }
-
-        this.AuthenticatedTokens = this.AuthenticatedTokens.filter((x) => !toremove.includes(x.token));
+        });
     }
 
     public async TryAuthWeb(login: string, pswd: string) {
         const user = await UserRepository.GetByLogin(login);
 
         if (!user) {
-            return new WebResponse(false, ResponseTypes.WrongLoginOrPassword);
+            return new WebResponse<User>(false, ResponseTypes.WrongLoginOrPassword);
         }
 
         if (user.blocked) {
-            return new WebResponse(false, ResponseTypes.BlockedByAdmin);
+            return new WebResponse<User>(false, ResponseTypes.BlockedByAdmin);
         }
 
         if (pswd === user.password || pswd === ToMD5(user.password || "")) {
             user.AUTHORIZED_DT = MIS_DT.GetExact();
             UserRepository.Update(user);
-            return new WebResponse(true, ResponseTypes.OK);
+            return new WebResponse<User>(true, ResponseTypes.OK).SetData(user);
         }
-        return new WebResponse(false, ResponseTypes.WrongLoginOrPassword);
+        return new WebResponse<User>(false, ResponseTypes.WrongLoginOrPassword);
     }
 
     public TryAuthTelegram(pswd: string, chatId: number): boolean {

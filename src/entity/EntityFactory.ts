@@ -37,7 +37,7 @@ export class EntityFactory<T extends Entity> {
     public async GetAll() {
         const entries = await this.Repository().select() as T[];
 
-        const r = entries.map((x) => this.Parse(x));
+        const r = await Promise.all(entries.map(async (x) => await this.Parse(x)));
 
         return r;
     }

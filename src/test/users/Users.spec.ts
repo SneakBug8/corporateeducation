@@ -2,24 +2,25 @@ import * as assert from "assert";
 import "mocha";
 import { AuthService } from "../../users/AuthService";
 import { User } from "../../users/User";
+import { UserRepository } from "../../users/repositories/UserRepository";
 
 describe("Users", () =>
 {
     it("GetByIdDummy", async () =>
     {
-        await User.GetById(0);
+        await UserRepository.GetById(0);
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetByLoginDummy", async () =>
     {
-        await User.GetByLogin("");
+        await UserRepository.GetByLogin("");
         // assert.ok(1 > 0, "Traded goods")
     });
 
     it("GetAllDummy", async () =>
     {
-        await User.GetAll();
+        await UserRepository.GetAll();
         // assert.ok(1 > 0, "Traded goods")
     });
 });
@@ -37,28 +38,33 @@ describe("Auth", () =>
         user.username = login;
         user.password = passwold;
 
-        id = await User.Insert(user);
+        const userentry = await UserRepository.Insert(user);
+        assert.ok(userentry.id, "User should have id");
+
+        if (userentry.id) {
+            id = userentry.id;
+        }
     });
 
     it("FindUser", async () =>
     {
-        const user = await User.GetByLogin(login);
+        const user = await UserRepository.GetByLogin(login);
 
         assert.ok(user, "User not found by login");
     });
 
     it("UpdateUser", async () =>
     {
-        const user = await User.GetById(id);
+        const user = await UserRepository.GetById(id);
 
         if (!user) {
             throw new Error("No error we've just created");
         }
         user.password = passwnew;
 
-        await User.Update(user);
+        await UserRepository.Update(user);
 
-        const user2 = await User.GetById(id);
+        const user2 = await UserRepository.GetById(id);
 
         assert.ok(user2?.password === passwnew, "Password was updated");
     });
@@ -72,6 +78,6 @@ describe("Auth", () =>
 
     it("DeleteUser", async () =>
     {
-        await User.Delete(id);
+        await UserRepository.Delete(id);
     });
 });

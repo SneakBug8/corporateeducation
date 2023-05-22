@@ -24,20 +24,33 @@ class UserRepositoryClass extends EntityFactory<User> {
     }
 
     public async GetAll() {
-        const entries = await this.Repository().select(Connection.raw("Users.*, (runsExperience + answersExperience) as totalExperience"))
+        const entries = await this.Repository().select() as User[];
+        /*Connection.raw("Users.*, (runsExperience + answersExperience) as totalExperience"))
         .joinRaw("left join (select userId, sum(experience) as runsExperience from Runs where finished = 1 group by userId) a on a.userId = id")
-        .joinRaw("left join (select userId, sum(experience) as answersExperience from Answers where marked = 1 group by userId) b on b.userId = id") as User[];
+        .joinRaw("left join (select userId, sum(experience) as answersExperience from Answers where marked = 1 and outdated = 0 group by userId) b on b.userId = id")*/ 
 
-        const r = entries.map((x) => this.Parse(x));
+        const t = await Promise.all(entries.map(async (x) => {
+            (x as any).totalExperience = await EducationService.GetUserTotalExperience(x.id as any)
+            return x;
+        }));
+        const r = await Promise.all(t.map(async (x) => await this.Parse(x)));
 
         return r;
     }
 
     public async GetMany(query: any) {
-        const data = await ConvertAdminQuery(query, this.Repository().select(Connection.raw("Users.*, (runsExperience + answersExperience) as totalExperience"))
+        const data = await ConvertAdminQuery(query, this.Repository().select()) as User[];
+
+        /*
+        Connection.raw("Users.*, (runsExperience + answersExperience) as totalExperience"))
         .joinRaw("left join (select userId, sum(experience) as runsExperience from Runs where finished = 1 group by userId) a on a.userId = id")
-        .joinRaw("left join (select userId, sum(experience) as answersExperience from Answers where marked = 1 group by userId) b on b.userId = id")) as User[];
-        const r = await Promise.all(data.map(async (x) => await this.Parse(x)));
+        .joinRaw("left join (select userId, sum(experience) as answersExperience from Answers where marked = 1 and outdated = 0 group by userId) b on b.userId = id")
+        */
+        const t = await Promise.all(data.map(async (x) => {
+            (x as any).totalExperience = await EducationService.GetUserTotalExperience(x.id as any)
+            return x;
+        }));
+        const r = await Promise.all(t.map(async (x) => await this.Parse(x)));
 
         return r;
     }

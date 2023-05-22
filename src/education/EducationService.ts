@@ -19,7 +19,6 @@ class EducationServiceClass extends EventEmitter {
 
     public async AdjustExperienceToTime(exerciseId: number, experience: number, time: number) {
         const steps = await ExerciseStepRepository.GetWithExercise(exerciseId);
-
         // 60 seconds per step or else drop experience
         return Math.round(experience * Math.min(1, steps.length * Config.TimePerQuestion / Math.max(time, 1)));
     }
@@ -36,16 +35,17 @@ class EducationServiceClass extends EventEmitter {
 
         const run = await this.EnsureRunObject(userId, exerciseId);
 
-        console.log("t2");
-
         const step = await ExerciseStepRepository.GetWithExerciseAndNumber(exerciseId, run.step);
 
         if (!step) {
             throw new Error("No such step");
         }
 
+        const stepcontent = (step.content || {}) as IExerciseContent;
+        stepcontent.type = step.type;
+
         return new WebResponse<IExerciseContent>(true, ResponseTypes.OK)
-            .SetData(step.content || JSON.parse(step._content || "{}") as IExerciseContent);
+            .SetData(stepcontent);
     }
 
     public async CanUserDoTask(userId: number, exerciseId: number) {
@@ -133,6 +133,15 @@ class EducationServiceClass extends EventEmitter {
         run.RESTART_DT = MIS_DT.GetExact();
 
         await ExerciseRunRepository.Update(run);
+
+        // Remove marked answers
+        const answers = await UserAnswerRepository.GetWithUserAndExercise(run.userId, run.exerciseId);
+
+        for (const answer of answers) {
+            answer.outdated = true;
+            await UserAnswerRepository.Update(answer);
+        }
+
         return run;
     }
 
@@ -177,7 +186,7 @@ class EducationServiceClass extends EventEmitter {
         // steps numbered from zero: 0, 1. no of steps = 2, when step ind == 2, we have done all steps
         if (run.step === noofsteps) {
             const r1 = await this.FinalizeTask(run);
-            return r1;
+            return r.Append(r1);
         }
         else {
             await ExerciseRunRepository.Update(run);
@@ -262,7 +271,7 @@ class EducationServiceClass extends EventEmitter {
         const answers = await UserAnswerRepository.GetWithUser(userId);
 
         for (const answer of answers) {
-            if (answer.marked) {
+            if (UserAnswerRepository.ShouldBeCounted(answer)) {
                 res += answer.experience || 0;
             }
         }
@@ -284,7 +293,7 @@ class EducationServiceClass extends EventEmitter {
         const answers = await UserAnswerRepository.GetWithUser(userId);
 
         for (const answer of answers) {
-            if (answer.marked) {
+            if (UserAnswerRepository.ShouldBeCounted(answer)) {
                 history.answersExperience += answer.experience || 0;
             }
         }

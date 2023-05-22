@@ -9,6 +9,7 @@ export class UserAnswer extends Entity {
 
     public marked: boolean = false;
     public step: number = 0;
+    public outdated: boolean = false;
 
 }
 

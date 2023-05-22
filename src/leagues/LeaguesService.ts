@@ -1,4 +1,5 @@
 import { ExerciseRunRepository } from "../education/repositories/ExerciseRunRepository";
+import { UserAnswerRepository } from "../education/repositories/UserAnswerRepository";
 import { UserRepository } from "../users/repositories/UserRepository";
 import { User } from "../users/User";
 import { MIS_DT } from "../util/MIS_DT";
@@ -42,9 +43,14 @@ export class LeaguesService {
             const xpsum = eligibleRuns.filter((x) => x.finished)
                 .reduce((p, c) => p + (c.experience || 0), 0);
 
+            
+            const eligibleAnswers = await UserAnswerRepository.GetWithUserAndDate(user.id, league.starts, league.ends);
+            const xpsum2 = eligibleAnswers.filter((x) => UserAnswerRepository.ShouldBeCounted(x))
+            .reduce((p, c) => p + (c.experience || 0), 0);
+
             const lastdt = eligibleRuns.reduce((p, c) => Math.max(p, c.FINISHED_DT), 0);
 
-            experienceRows.push(new LeagueRow(user.id, user.username, xpsum, lastdt));
+            experienceRows.push(new LeagueRow(user.id, user.username, xpsum + xpsum2, lastdt));
         }
 
         return experienceRows

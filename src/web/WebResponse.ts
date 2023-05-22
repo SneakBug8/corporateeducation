@@ -16,15 +16,24 @@ export class WebResponse<T> {
         this.history.push(reason);
     }
 
+    public Append(newresponse: WebResponse<T>) {
+        return this.SetStatus(newresponse.Is(true), newresponse.reason).SetData(newresponse.data);
+    }
+
     public SetStatus(ok: boolean, reason: ResponseTypes) {
         this.ok = ok;
         this.reason = reason;
         this.history.push(reason);
+        return this;
     }
 
     public SetData(data: T | undefined) {
         this.data = data;
         return this;
+    }
+
+    public GetData() {
+        return this.data;
     }
 
     public GetReason() {

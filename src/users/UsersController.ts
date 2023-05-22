@@ -39,7 +39,13 @@ class UsersController {
             return res.json(r.copy());
         }
 
-        const token = await AuthService.CreateToken(login);
+        const user = r.GetData();
+
+        if (!user || !user.id) {
+            return res.json(new WebResponse(false, ResponseTypes.Null).copy());
+        }
+
+        const token = await AuthService.CreateToken(user.id);
 
         const resdata = new WebResponse(true, ResponseTypes.OK).SetData({token});
 

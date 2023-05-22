@@ -22,14 +22,25 @@ class UserAnswerRepositoryClass extends EntityFactory<UserAnswer> {
     }
 
     public  async GetWithUserAndExercise(userId: number, exerciseId: number) {
-        const entries = await this.Repository().where("userId", userId).andWhere("exercise", exerciseId).select();
-        if (entries.length) {
-            return entries[0] as UserAnswer;
-        }
+        const entries = await this.Repository().where("userId", userId).andWhere("exerciseId", exerciseId).select();
+        return entries as UserAnswer[];
     }
 
-    public  async GetExact(userId: number, exerciseId: number, step: number) {
-        const entries = await this.Repository().where("userId", userId).andWhere("exercise", exerciseId)
+    public  async GetWithUserAndDate(userId: number,  mindt: number, maxdt: number) {
+        const entries = await this.Repository().where("userId", userId)
+        .andWhere("MIS_DT", ">", mindt)
+        .andWhere("MIS_DT", "<", maxdt)
+        .select();
+
+        return entries as UserAnswer[];
+    }
+
+    public ShouldBeCounted(answer: UserAnswer) {
+        return answer.marked && !answer.outdated;
+    }
+
+    public async GetExact(userId: number, exerciseId: number, step: number) {
+        const entries = await this.Repository().where("userId", userId).andWhere("exerciseId", exerciseId)
         .andWhere("step", step).select();
         if (entries.length) {
             return entries[0] as UserAnswer;

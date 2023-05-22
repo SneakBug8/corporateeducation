@@ -14,4 +14,5 @@ export class ExerciseStep extends Entity {
 export interface IExerciseContent {
     text: string;
     answers: string[];
+    type: string | undefined
 }

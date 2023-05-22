@@ -4,6 +4,8 @@ import { League } from "./League";
 
 class LeagueRepositoryClass extends EntityFactory<League> {
     public async Cleanup(t: League) {
+        // Dates passed from admin are in this format
+        
         if (t.starts && typeof t.starts === "string"
         && new RegExp("[0-9]{4}-[0-9]{2}-[0-9]{2}").test(t.starts)) {
             t.starts = new Date(t.starts).getTime();

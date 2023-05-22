@@ -5,24 +5,24 @@ import { ExerciseStep } from "../entities/ExerciseStep";
 
 class ExerciseStepRepositoryClass extends EntityFactory<ExerciseStep> {
     public async Parse(t: ExerciseStep) {
-        if (t._content) {
-            t.content = JSON.parse(t._content);
+        if (t.content) {
+            t.content = JSON.parse(t.content as any);
         }
         return t;
     }
 
     public async GetWithExercise(exercise: number) {
-        const entries = await this.Repository().where("exercise", "LIKE", `%${exercise}%`).select();
+        const entries = await this.Repository().where("exercise", exercise).select();
 
         return entries as ExerciseStep[];
     }
 
     public async GetWithExerciseAndNumber(exercise: number, step: number) {
-        const entries = await this.Repository().where("exercise", "LIKE", `%${exercise}%`)
-            .andWhere("stepnumber", "LIKE", `%${step}%`).select();
+        const entries = await this.Repository().where("exercise", exercise)
+            .andWhere("stepnumber", step).select();
 
         if (entries.length) {
-            return entries[0] as ExerciseStep;
+            return this.Parse(entries[0] as ExerciseStep);
         }
     }
 

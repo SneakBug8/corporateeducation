@@ -4,6 +4,8 @@ import * as assert from "assert";
 import { League } from "../../leagues/League";
 import { MIS_DT } from "../../util/MIS_DT";
 import { LeaguesService } from "../../leagues/LeaguesService";
+import { UserRepository } from "../../users/repositories/UserRepository";
+import { LeagueRepository } from "../../leagues/LeagueRepository";
 
 const testgroup = 1;
 const exerciseid = 1;
@@ -20,7 +22,13 @@ describe("Leagues", () => {
         user.password = passw;
         user.group = testgroup;
 
-        testuser = await User.Insert(user);
+        const testuserentry = await UserRepository.Insert(user);
+
+        assert.ok(testuserentry.id, "User should have id");
+
+        if (testuserentry.id) {
+            testuser = testuserentry.id;
+        }
     });
     it("Create a League", async () => {
         const league = new League();
@@ -28,7 +36,12 @@ describe("Leagues", () => {
         league.starts = MIS_DT.GetExact() - MIS_DT.OneDay() * 30;
         league.group = testgroup;
 
-        testleague = await League.Insert(league);
+        const testleagueentry = await LeagueRepository.Insert(league);
+        assert.ok(testleagueentry.id, "League should have id");
+
+        if (testleagueentry.id) {
+            testleague = testleagueentry.id;
+        }
     });
     it("Complete a task", async () => {
         console.log(await EducationService.GetTaskContent(testuser, exerciseid));
