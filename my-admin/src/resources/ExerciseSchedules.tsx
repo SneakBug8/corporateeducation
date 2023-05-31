@@ -41,8 +41,8 @@ export const SchedulesList = (props: any) => (
             <TextField source="minExp"/>
             <TextField source="maxExp"/>
 
-            <DateField source="MIS_DT" />
-            <DateField source="UPDATED_DT" />
+            {window.innerWidth > 1440 && <DateField source="MIS_DT" />}
+            {window.innerWidth > 1440 && <DateField source="UPDATED_DT" />}
             <EditButton />
         </Datagrid>
     </List>

@@ -25,6 +25,9 @@ import { UserExperienceHistoryList } from "./resources/UserExperienceHistory";
 import DatasetIcon from '@mui/icons-material/Dataset';
 import { ExerciseRunHistory } from "./resources/ExerciseRunHistory";
 import { i18nProvider } from "./i18n/i18n";
+import { FeedbackEdit, FeedbackList } from "./resources/Feedbacks";
+import { AchievementCreate, AchievementEdit, AchievementList } from "./resources/Achievements";
+import { ReceivedAchievementList } from "./resources/ReceivedAchievements";
 
 const dataProvider = restProvider("http://localhost:3000/api");
 // jsonServerProvider("https://jsonplaceholder.typicode.com");
@@ -79,9 +82,11 @@ const App = () => (
     edit={LeagueEdit} create={LeagueCreate}
     recordRepresentation="name"
     icon={LeaderboardIcon} />
-    <Resource icon={EmojiEventsIcon} name="achievements" list={UsersList}  />
+    <Resource icon={EmojiEventsIcon} name="achievements" list={AchievementList}
+    edit={AchievementEdit} create={AchievementCreate}  />
+    <Resource icon={DatasetIcon} name="receivedachievements" list={ReceivedAchievementList}  />
     <Resource name="feedback"
-    list={UsersList} icon={FeedbackIcon}  />
+    list={FeedbackList} icon={FeedbackIcon} edit={FeedbackEdit}  />
     <Resource name="notifications"
     list={UsersList} icon={NotificationsIcon}/>
 

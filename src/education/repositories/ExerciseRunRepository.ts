@@ -19,14 +19,14 @@ class ExerciseRunRepositoryClass extends EntityFactory<ExerciseRun> {
     }
 
     public async GetWithExercise(id: number) {
-        const entries = await this.Repository().where("exerciseId", "LIKE", `%${id}%`).select();
+        const entries = await this.Repository().where("exerciseId", id).select();
         return entries;
     }
 
     public async GetWithUserAndExercise(userId: number, exerciseId: number) {
 
         const entries = await this.Repository().where("userId", userId)
-            .andWhere("exerciseId", "LIKE", `%${exerciseId}%`)
+            .andWhere("exerciseId", exerciseId)
             .orderBy("trynumber", "desc").select();
 
             

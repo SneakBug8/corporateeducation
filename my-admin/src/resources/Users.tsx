@@ -53,6 +53,7 @@ export const UsersList = (props: any) => (
               { id: 1, name: "Trainer" },
               { id: 2, name: "Administrator" },
             ]} />
+            <TextField source="name" />
             <TextField source="company" />
             <NumberField source="totalExperience"/>
             <BooleanField source="blocked" looseValue={true}/>
@@ -83,6 +84,7 @@ export const UserEdit = (props: any) => (
             ]} />
             <TextInput source="email" />
             <ReferenceInput source="group" reference="groups" />
+            <TextInput source="name" />
             <TextInput source="company" />
             <BooleanInput source="blocked" looseValue={true}/>
             <TextInput disabled source="timeonline" />
@@ -108,6 +110,7 @@ export const UserCreate = (props: any) => (
             ]} />
             <TextInput source="email" />
             <ReferenceInput source="group" reference="groups" />
+            <TextInput source="name" />
             <TextInput source="company" />
         </SimpleForm>
     </Create>

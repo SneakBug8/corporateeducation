@@ -42,11 +42,9 @@ export const UserAnswersList = (props: any) => (
             <TextField source="experience" />
             <BooleanField source="marked" looseValue={true} />
             <BooleanField source="outdated" looseValue={true} />
-
             <TextField source="step" />
-
-            <DateField source="MIS_DT" showTime  />
-            <DateField source="UPDATED_DT" showTime  />
+            {window.innerWidth > 1440 && <DateField source="MIS_DT" showTime />}
+            {window.innerWidth > 1440 && <DateField source="UPDATED_DT" showTime />}
             <EditButton />
         </Datagrid>
     </List>

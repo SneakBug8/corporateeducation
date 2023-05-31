@@ -5,9 +5,20 @@ import { ExerciseStep } from "../entities/ExerciseStep";
 
 class ExerciseStepRepositoryClass extends EntityFactory<ExerciseStep> {
     public async Parse(t: ExerciseStep) {
-        if (t.content) {
-            t.content = JSON.parse(t.content as any);
+        try {
+            if (t.content) {
+                t.content = JSON.parse(t.content as any);
+            }
+            return t;
         }
+        catch (e) {
+            console.error(t.content);
+            return t;
+        }
+    }
+
+    public async Cleanup(t: ExerciseStep) {
+        t.content = JSON.stringify(t.content as any) as any;
         return t;
     }
 

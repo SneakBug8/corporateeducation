@@ -15,6 +15,10 @@ import { UsersWebService } from "./users/UsersController";
 import { AuthService } from "./users/AuthService";
 import { LeagueController } from "./leagues/LeagueController";
 
+import { FeedbackController } from "./feedback/FeedbackController";
+import { AchievementsController } from "./achievements/AchievementsController";
+import { AchievementsService } from "./achievements/AchievementsService";
+
 
 let waitingCallback: ((message: MessageWrapper) => any) | null = null;
 
@@ -55,8 +59,8 @@ class App {
     private readingMessage: boolean = false;
     public loaded = false;
 
-    public MessageEvent = new SyncEvent();
-    public IntervalEvent = new SyncEvent();
+    public MessageEvent = new SyncEvent<undefined>();
+    public IntervalEvent = new SyncEvent<undefined>();
 
     public async WaitForLoad() {
         while (!this.loaded) {
@@ -84,6 +88,10 @@ class App {
         EducationWebService.Init();
         UsersWebService.Init();
         LeagueController.Init();
+        FeedbackController.Init();
+        AchievementsController.Init();
+
+        AchievementsService.Init()
 
         setInterval(this.Intervals.bind(this), 5 * 60 * 1000);
     }
@@ -104,7 +112,7 @@ class App {
             }
         }
 
-        this.IntervalEvent.Emit();
+        this.IntervalEvent.Emit(undefined);
     }
     /*
     private async messageHandler(msg: TelegramBot.Message)

@@ -10,9 +10,12 @@ export enum UserRole {
 export class User extends Entity {
     public username: string | undefined;
     public password: string | undefined;
+
+
     public role: number | undefined = 0;
     public group: number | undefined;
     public email: string | undefined;
+    public name: string = "";
     public company: string = "";
     public blocked: number | undefined = 0;
     public AUTHORIZED_DT = MIS_DT.GetExact();

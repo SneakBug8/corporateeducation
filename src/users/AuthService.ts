@@ -14,14 +14,29 @@ class AuthServiceClass {
 
     public constructor() {
         if (Config.isDev()) {
-            console.log(`Adding test token due to dev environment`);
+            this.setDevTokens();
+        }
+    }
 
-            const token = new TokenEntry();
-            token.userId = 1;
-            token.token = "entirelysecrettoken"
-            token.liveuntil = MIS_DT.GetExact() + MIS_DT.OneDay()
+    private async setDevTokens() {
+        console.log(`Adding test token due to dev environment`);
 
-            UserTokenRepository.Insert(token);
+        for (let i = 1; i <= 10; i++) {
+
+            const ent = await UserTokenRepository.GetWithToken("entirelysecrettoken" + i);
+
+            if (ent) {
+                ent.liveuntil = MIS_DT.GetExact() + MIS_DT.OneDay();
+
+                UserTokenRepository.Update(ent);
+            }
+            else {
+                const token = new TokenEntry();
+                token.userId = i;
+                token.token = "entirelysecrettoken" + i
+
+                UserTokenRepository.Insert(token);
+            }
         }
     }
 
@@ -92,7 +107,7 @@ class AuthServiceClass {
                 user.timeonline = (user.timeonline || 0) + user.DEAUTHORIZED_DT - user.AUTHORIZED_DT;
 
                 UserRepository.Update(user);
-                
+
                 entry.active = false;
                 UserTokenRepository.Update(entry);
                 console.log(`Dropping session of ${user.username}`);

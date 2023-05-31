@@ -3,7 +3,7 @@ import * as React from "react";
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField,
     EditButton, TextInput, Toolbar, SaveButton, DeleteButton, usePermissions,
-    ReferenceInput, AutocompleteInput, ReferenceField, SelectInput, WithRecord, DateInput, DateField, useRecordContext, FilterButton
+    ReferenceInput, AutocompleteInput, ReferenceField, SelectInput, WithRecord, DateInput, DateField, useRecordContext, FilterButton, BooleanInput
 } from "react-admin";
 import { ExerciseStep } from "../entities/ExerciseStep";
 import { ManagerLimitedActions } from "../util/Common";
@@ -12,7 +12,7 @@ import TF from '@mui/material/TextField';
 import { Link } from 'react-router-dom';
 import { Button } from "@mui/material";
 import { useState } from "react";
-
+import ToggleButton from '@mui/material/ToggleButton';
 
 
 const CustomToolbar = ({ ...props }: any) => {
@@ -27,7 +27,7 @@ const CustomToolbar = ({ ...props }: any) => {
 // Filters
 const postFilters = [
     <TextInput label="Id" source="id" alwaysOn />,
-    <TextInput label="Type" source="type" />,
+    <TextInput source="type" />,
     <ReferenceInput source="exercise" reference="exercises" />
 ];
 
@@ -70,8 +70,16 @@ const StepEditor = (props: any) => {
 
     console.log(field);
 
-    // const content = JSON.parse(field.value || "{}");
-    const content = field.value;
+    let content = field.value || {};
+
+    if (typeof content === "string") {
+        try {
+            content = JSON.parse(field.value || "{}");
+        }
+        catch {
+            content = {};
+        }
+    }
 
     const [numOfAnswers, setNum ] = useState(content && content.answers && content.answers.length || 0);
     const generateArrays = [];
@@ -97,10 +105,22 @@ const StepEditor = (props: any) => {
     };
 
     const onAnswerRemoved = () => {
+        if (numOfAnswers > 0) {
         content.answers.pop();
         field.onChange(content);
 
         setNum(numOfAnswers- 1);
+        }
+    }
+
+    const onAnswerAdded = () => {
+        if (!content.answers) {
+            content.answers = [];
+        }
+        content.answers.push("");
+        field.onChange(content);
+
+        setNum(numOfAnswers + 1);
     }
 
     /* 
@@ -117,9 +137,8 @@ const StepEditor = (props: any) => {
         {t === "quiz" &&
             <>
                 <TextInput source="correctAnswer" label="Correct answer" placeholder='a' />
-
                 <br/>
-                <div><Button variant="contained" onClick={() => setNum(numOfAnswers + 1)}>+</Button>
+                <div><Button variant="contained" onClick={onAnswerAdded}>+</Button>
                 <Button variant="contained" onClick={onAnswerRemoved}>-</Button></div>
                 <br/>
                 <>{generateArrays.map(x => <QuizAnswer id={x} key={x} value={content.answers[x]} callback={onAnswerChange}/>)}</>

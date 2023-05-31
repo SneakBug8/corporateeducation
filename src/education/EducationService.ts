@@ -14,8 +14,9 @@ import { UserRepository } from "../users/repositories/UserRepository";
 import { IExerciseContent } from "./entities/ExerciseStep";
 import { UserExperienceHistory } from "./entities/UserExperienceHistory";
 import { UserExperienceHistoryRepository } from "./repositories/UserExperienceHistory";
+import { SyncEvent } from "../util/SyncEvent";
 
-class EducationServiceClass extends EventEmitter {
+class EducationServiceClass {
 
     public async AdjustExperienceToTime(exerciseId: number, experience: number, time: number) {
         const steps = await ExerciseStepRepository.GetWithExercise(exerciseId);
@@ -195,6 +196,8 @@ class EducationServiceClass extends EventEmitter {
         return r;
     }
 
+    public OnTaskFinished = new SyncEvent<ExerciseRun>();
+
     private async FinalizeTask(run: ExerciseRun) {
         const now = MIS_DT.GetExact();
         const time = Math.floor((now - run.RESTART_DT) / 1000);
@@ -208,6 +211,9 @@ class EducationServiceClass extends EventEmitter {
             run.finished = true;
             run.FINISHED_DT = MIS_DT.GetExact();
             await ExerciseRunRepository.Update(run);
+
+            this.OnTaskFinished.Emit(run);
+
             return new WebResponse(true, ResponseTypes.ExcerciseFinished);
         }
         else if (t.GetReason() === ResponseTypes.NotEnoughXp) {

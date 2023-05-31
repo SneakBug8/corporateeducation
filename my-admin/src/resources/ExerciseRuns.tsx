@@ -42,9 +42,9 @@ export const ExerciseRunsList = (props: any) => (
             <ReferenceField source="userId" reference="users" />
             <TextField source="experience" />
             <BooleanField source="finished" looseValue={true}/>
-            <DateField source="FINISHED_DT" />
-            <DateField source="MIS_DT" />
-            <DateField source="UPDATED_DT" />
+            {window.innerWidth > 1440 && <DateField source="FINISHED_DT" />}
+            {window.innerWidth > 1440 && <DateField source="MIS_DT" />}
+            {window.innerWidth > 1440 && <DateField source="UPDATED_DT" />}
             <EditButton />
         </Datagrid>
     </List>
