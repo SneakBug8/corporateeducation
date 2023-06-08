@@ -1,7 +1,7 @@
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField,
     EditButton, TextInput, Toolbar, SaveButton, DeleteButton, usePermissions,
-    ReferenceInput, AutocompleteInput,PasswordInput,
+    ReferenceInput, AutocompleteInput,PasswordInput, useTranslate ,
     NumberField, ReferenceField, DateField, DateInput, FilterButton, required, SelectInput, SelectField, BooleanField, BooleanInput
 } from "react-admin";
 import { User } from "../entities/User";
@@ -97,16 +97,18 @@ export const UserEdit = (props: any) => (
     </Edit>
 );
 
-export const UserCreate = (props: any) => (
-    <Create title="Create a User" {...props}>
+export const UserCreate = (props: any) => {
+    const translate = useTranslate(); // returns the i18nProvider.translate() method
+
+    return <Create title="Create a User" {...props}>
         <SimpleForm>
             <TextInput disabled source="id" />
             <TextInput validate={[required()]} source="username" />
             <PasswordInput validate={[required()]} source="password" />
             <SelectInput source="role" validate={[required()]} choices={[
-              { id: 0, name: "User" },
-              { id: 1, name: "Trainer" },
-              { id: 2, name: "Administrator" },
+              { id: 0, name: translate('ra.role.user') || "User" },
+              { id: 1, name: translate('ra.role.trainer') ||"Trainer" },
+              { id: 2, name: translate('ra.role.admin') || "Administrator" },
             ]} />
             <TextInput source="email" />
             <ReferenceInput source="group" reference="groups" />
@@ -114,4 +116,4 @@ export const UserCreate = (props: any) => (
             <TextInput source="company" />
         </SimpleForm>
     </Create>
-);
+};

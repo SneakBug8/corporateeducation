@@ -12,8 +12,8 @@ class AchievementsServiceClass {
         if (run.exerciseId === 1) {
             this.GiveAchievement(run.userId, 1);
         }
-        if (run.exerciseId === 2) {
-            this.GiveAchievement(run.userId, 6);
+        if (run.exerciseId === 6) {
+            this.GiveAchievement(run.userId, 2);
         }
         // Non-blocking event
         return false;

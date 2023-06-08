@@ -2,6 +2,11 @@ import { TranslationMessages } from 'ra-core';
 
 const russianMessages: TranslationMessages = {
     ra: {
+        role: {
+            user:"Пользователь",
+            trainer:"Тренер",
+            admin:"Администратор"
+        },
         action: {
             add_filter: 'Добавить фильтр',
             add: 'Добавить',

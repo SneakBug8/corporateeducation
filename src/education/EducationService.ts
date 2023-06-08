@@ -80,7 +80,7 @@ class EducationServiceClass {
         const t = await this.CheckEducationScheduleOnStart(userId, exerciseId);
         console.log(`User ${userId} can ${t.Is(true)} do task ${exerciseId}`);
 
-        if (t.Is(false)) {
+        if (t.Is(false) && !this.DidUserStartTask(userId, exerciseId)) {
             return t;
         }
 
@@ -92,6 +92,13 @@ class EducationServiceClass {
 
         console.log(`User ${userId} finished exercise ${exerciseId}: ${run && run.finished}`);
         return run && run.finished;
+    }
+
+    public async DidUserStartTask(userId: number, exerciseId: number) {
+        const run = await ExerciseRunRepository.GetWithUserAndExercise(userId, exerciseId);
+
+        console.log(`User ${userId} started exercise ${exerciseId}: ${run && run.finished}`);
+        return run;
     }
 
     private async EnsureRunObject(userId: number, exerciseId: number) {
