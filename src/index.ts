@@ -3,12 +3,11 @@ dotenv.config();
 
 // import { BotAPI } from "./api/bot";
 import { Config } from "./config";
-import { BackupCycle, InitBackup, ProcessBackup } from "./backup/BackupService";
+// import { BackupCycle, InitBackup, ProcessBackup } from "./backup/BackupService";
 import { Sleep } from "./util/Sleep";
 import { Scheduler } from "./util/Scheduler";
 import { ErrorLogger } from "./util/ErrorLogger";
 import { SyncEvent } from "./util/SyncEvent";
-import { MessageWrapper } from "./MessageWrapper";
 
 import { EducationWebService } from "./education/EducationController";
 import { UsersWebService } from "./users/UsersController";
@@ -18,41 +17,8 @@ import { LeagueController } from "./leagues/LeagueController";
 import { FeedbackController } from "./feedback/FeedbackController";
 import { AchievementsController } from "./achievements/AchievementsController";
 import { AchievementsService } from "./achievements/AchievementsService";
+import TelegramBot = require("node-telegram-bot-api");
 
-
-let waitingCallback: ((message: MessageWrapper) => any) | null = null;
-
-
-export function setWaitingForValue(message: string, callback: (message: MessageWrapper) => any) {
-    // Server.SendMessage(message, [[{ text: "/exit" }]]);
-    waitingCallback = callback;
-}
-
-export function setWaitingForValuePure(callback: (message: MessageWrapper) => any) {
-    waitingCallback = callback;
-}
-/*
-export function defaultKeyboard(): TelegramBot.KeyboardButton[][]
-{
-    return [
-        [{ text: "/slots" }, { text: "/slot prev" }, { text: "/slot next" }],
-        [{ text: "/logs" }, { text: "/publish" }, { text: "/evergreen" }],
-        [{ text: "/networking" }, { text: "/crypto" }, { text: "/investment" }],
-        [{ text: "/reset" }, { text: "/notes undo" }, { text: "/extra" }],
-    ];
-}
-
-export function extraKeyboard(): TelegramBot.KeyboardButton[][]
-{
-    return [
-        [{ text: "/notify" }, { text: "/timer" }, { text: "/networking policy set" }],
-        [{ text: "/projects" }, { text: "/learning" }, { text: "/todo" }],
-        [{ text: "/load" }],
-
-        [{ text: "/exit" }],
-    ];
-}
-*/
 
 class App {
     // private bot: TelegramBot;
@@ -99,7 +65,7 @@ class App {
     public async Intervals() {
         const listeners = [
             // Scheduler.Interval.bind(Scheduler),
-            BackupCycle,
+            // BackupCycle,
             AuthService.ReviewTokens.bind(AuthService),
         ];
 

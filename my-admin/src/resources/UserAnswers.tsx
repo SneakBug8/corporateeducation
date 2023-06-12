@@ -1,4 +1,5 @@
-// in posts.js
+// @ts-nocheck
+
 import * as React from "react";
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField,

@@ -4,7 +4,7 @@ import { EducationService } from "../../education/EducationService";
 import { Entity } from "../../entity/Entity";
 import { EntityFactory } from "../../entity/EntityFactory";
 import { ResponseTypes } from "../../web/ResponseTypes";
-import { User, UserRole } from "../User";
+import { User, UserRole } from "../entities/User";
 
 class UserRepositoryClass extends EntityFactory<User> {
     public async GetWithGroup(groupid: number) {

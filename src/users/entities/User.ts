@@ -1,8 +1,8 @@
-import { ConvertAdminQuery } from "../api/AdminQuery";
-import { Connection } from "../Database";
-import { Entity } from "../entity/Entity";
-import { MIS_DT } from "../util/MIS_DT";
-import { ResponseTypes } from "../web/ResponseTypes";
+import { ConvertAdminQuery } from "../../api/AdminQuery";
+import { Connection } from "../../Database";
+import { Entity } from "../../entity/Entity";
+import { MIS_DT } from "../../util/MIS_DT";
+import { ResponseTypes } from "../../web/ResponseTypes";
 
 export enum UserRole {
     Student, Trainer, Administrator

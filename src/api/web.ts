@@ -39,21 +39,9 @@ class WebApiClass {
         next();
         return;
       }
-      if (!req.cookies || !req.cookies.password) {
-        res.render("login", { err: "" });
-      }
-      else if (req.cookies.password !== Config.Password) {
-        res.render("login", {
-          err: "Wrong password"
-        });
-      }
       else {
         next();
       }
-    });
-
-    this.app.get("/", (req, res) => {
-      res.render("index");
     });
   }
 }

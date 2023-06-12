@@ -1,5 +1,7 @@
-export class ExerciseRun {
-    public id: number | undefined;
+import { Entity } from "../../entity/Entity";
+import { MIS_DT } from "../../util/MIS_DT";
+export class ExerciseRun extends Entity {
+
     public userId: number = 0;
     public exerciseId: number = 0;
     public time: number | undefined;
@@ -8,7 +10,10 @@ export class ExerciseRun {
     public step: number = 0;
     public finished: boolean = false;
     public FINISHED_DT = 0;
-    public MIS_DT = 0;
-    public UPDATED_DT = 0;
-}
+    public RESTART_DT = MIS_DT.GetExact();
+    public trynumber: number = 0;
+    public mistakes: number = 0;
 
+    public userGroup: number = 0;
+
+}

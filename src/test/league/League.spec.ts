@@ -1,5 +1,5 @@
 import { EducationService } from "../../education/EducationService";
-import { User } from "../../users/User";
+import { User } from "../../users/entities/User";
 import * as assert from "assert";
 import { League } from "../../leagues/League";
 import { MIS_DT } from "../../util/MIS_DT";

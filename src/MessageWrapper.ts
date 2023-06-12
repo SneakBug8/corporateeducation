@@ -1,8 +1,34 @@
 import TelegramBot = require("node-telegram-bot-api");
 import { BotAPI } from "./api/bot";
 import dateFormat = require("dateformat");
-import { defaultKeyboard } from ".";
 import { MIS_DT } from "./util/MIS_DT";
+
+let waitingCallback: ((message: MessageWrapper) => any) | null = null;
+
+
+export function setWaitingForValue(message: string, callback: (message: MessageWrapper) => any) {
+    // Server.SendMessage(message, [[{ text: "/exit" }]]);
+    waitingCallback = callback;
+}
+
+export function setWaitingForValuePure(callback: (message: MessageWrapper) => any) {
+    waitingCallback = callback;
+}
+
+export function defaultKeyboard(): TelegramBot.KeyboardButton[][]
+{
+    return [
+        [{ text: "/slots" }, { text: "/slot prev" }, { text: "/slot next" }],
+    ];
+}
+
+export function extraKeyboard(): TelegramBot.KeyboardButton[][]
+{
+    return [
+        [{ text: "/notify" }, { text: "/timer" }, { text: "/networking policy set" }],
+        [{ text: "/exit" }],
+    ];
+}
 
 export class MessageWrapper
 {

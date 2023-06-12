@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import "mocha";
 import { AuthService } from "../../users/AuthService";
-import { User } from "../../users/User";
+import { User } from "../../users/entities/User";
 import { UserRepository } from "../../users/repositories/UserRepository";
 
 describe("Users", () =>

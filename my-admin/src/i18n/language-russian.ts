@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TranslationMessages } from 'ra-core';
 
 const russianMessages: TranslationMessages = {
@@ -123,7 +124,7 @@ const russianMessages: TranslationMessages = {
             page_out_of_boundaries: 'Page number %{page} out of boundaries',
             page_out_from_end: 'Cannot go after last page',
             page_out_from_begin: 'Cannot go before page 1',
-            page_range_info: '%{offsetBegin}-%{offsetEnd} of %{total}',
+            page_range_info: '%{offsetBegin}-%{offsetEnd} из %{total}',
             partial_page_range_info:
                 '%{offsetBegin}-%{offsetEnd} of more than %{offsetEnd}',
             current_page: 'Page %{page}',

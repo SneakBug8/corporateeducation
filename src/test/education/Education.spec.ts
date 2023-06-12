@@ -8,7 +8,7 @@ import { UserAnswerRepository } from "../../education/repositories/UserAnswerRep
 import { EducationService } from "../../education/EducationService";
 import { Exercise } from "../../education/entities/Exercise";
 import { ExerciseSchedule } from "../../education/entities/ExerciseSchedule";
-import { User } from "../../users/User";
+import { User } from "../../users/entities/User";
 import { Check } from "../../util/Check";
 import { MIS_DT } from "../../util/MIS_DT";
 import { Sleep } from "../../util/Sleep";

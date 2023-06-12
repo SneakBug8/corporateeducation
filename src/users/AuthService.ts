@@ -3,9 +3,10 @@ import { MIS_DT } from "../util/MIS_DT";
 import { ToMD5 } from "../util/ToMd5";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { WebResponse } from "../web/WebResponse";
-import { User } from "./User";
+import { TokenEntry } from "./entities/TokenEntry";
+import { User } from "./entities/User";
 import { UserRepository } from "./repositories/UserRepository";
-import { TokenEntry, UserTokenRepository } from "./repositories/UserTokenRepository";
+import { UserTokenRepository } from "./repositories/UserTokenRepository";
 
 class AuthServiceClass {
     public chatId: number | undefined;

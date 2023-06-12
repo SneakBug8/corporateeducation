@@ -1,4 +1,5 @@
-// in posts.js
+// @ts-nocheck
+
 import { Button } from "@mui/material";
 import * as React from "react";
 import {
@@ -22,8 +23,8 @@ const CustomToolbar = ({ ...props }: any) => {
 };
 
 const postFilters = [
-    <TextInput label="Name" source="name" alwaysOn />,
-    <TextInput label="public" source="public" defaultValue="1" />,
+    <TextInput source="name" alwaysOn />,
+    <TextInput source="public" defaultValue="1" />,
 ];
 
 const MyActions = () => (

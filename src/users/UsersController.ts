@@ -2,7 +2,7 @@ import { WebApi } from "../api/web";
 import * as express from "express";
 import { Logger } from "winston";
 import { ParseAdminQuery } from "../api/AdminQuery";
-import { User } from "./User";
+import { User } from "./entities/User";
 import { UserRepository } from "./repositories/UserRepository";
 import { WebResponse } from "../web/WebResponse";
 import { ResponseTypes } from "../web/ResponseTypes";

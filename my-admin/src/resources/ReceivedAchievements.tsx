@@ -5,7 +5,7 @@ import {
     EditButton, TextInput, Toolbar, SaveButton, DeleteButton, usePermissions,
     ReferenceInput, AutocompleteInput, ReferenceField, BooleanInput, NumberInput, DateInput, DateField, BooleanField, FilterButton, useRecordContext, required
 } from "react-admin";
-import { ReadonlyActions } from "../util/Common";
+import { ManagerLimitedActions, ReadonlyActions } from "../util/Common";
 
 const CustomToolbar = ({ ...props }: any) => {
     const { permissions } = usePermissions();
@@ -25,9 +25,9 @@ const postFilters = [
 
 // Add filter button
 const MyActions = () => (
-    <ReadonlyActions>
+    <ManagerLimitedActions>
         <FilterButton filters={postFilters} />
-    </ReadonlyActions>
+    </ManagerLimitedActions>
 )
 
 export const ReceivedAchievementList = (props: any) => (
@@ -42,3 +42,12 @@ export const ReceivedAchievementList = (props: any) => (
     </List>
 );
 
+
+export const ReceivedAchievementCreate = (props: any) => (
+    <Create title="Create a Received Achievement" {...props}>
+        <SimpleForm>
+            <ReferenceInput source="achievementId" reference="achievements" />
+            <ReferenceInput source="userId" reference="users"/>,
+        </SimpleForm>
+    </Create>
+);

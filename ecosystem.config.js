@@ -1,10 +1,10 @@
 module.exports = {
   apps : [{
-    name: 'diarybot',
+    name: 'bmweducation',
     script: 'npm',
 
     // Options reference: https://pm2.io/doc/en/runtime/reference/ecosystem-file/
-    args: 'start',
+    args: 'start -port 3001',
     instances: 1,
     autorestart: true,
     watch: ["bin"],

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField,
     EditButton, TextInput, Toolbar, SaveButton, DeleteButton, usePermissions,

@@ -1,7 +1,7 @@
 import { ExerciseRunRepository } from "../education/repositories/ExerciseRunRepository";
 import { UserAnswerRepository } from "../education/repositories/UserAnswerRepository";
 import { UserRepository } from "../users/repositories/UserRepository";
-import { User } from "../users/User";
+import { User } from "../users/entities/User";
 import { MIS_DT } from "../util/MIS_DT";
 import { ResponseTypes } from "../web/ResponseTypes";
 import { WebResponse } from "../web/WebResponse";

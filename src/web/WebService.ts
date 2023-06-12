@@ -1,7 +1,7 @@
 import { WebApi } from "../api/web";
 import * as express from "express";
 import { AuthService } from "../users/AuthService";
-import { User, UserRole } from "../users/User";
+import { User, UserRole } from "../users/entities/User";
 import { ResponseTypes } from "./ResponseTypes";
 
 class WebServiceClass

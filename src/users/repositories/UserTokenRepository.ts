@@ -1,13 +1,6 @@
 import { Connection } from "../../Database";
-import { Entity } from "../../entity/Entity";
 import { EntityFactory } from "../../entity/EntityFactory";
-
-export class TokenEntry extends Entity {
-    userId: number | undefined;
-    token: string | undefined;
-    liveuntil: number | undefined;
-    active: boolean = true;
-}
+import { TokenEntry } from "../entities/TokenEntry";
 
 class UserTokenRepositoryClass extends EntityFactory<TokenEntry> {
     public async GetActiveWithToken(token: string) {
