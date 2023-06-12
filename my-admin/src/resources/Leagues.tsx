@@ -1,4 +1,5 @@
-// in posts.js
+// @ts-nocheck
+
 import { useState, useEffect } from "react";
 import {
     List, Datagrid, Edit, Create, SimpleForm, TextField, EditButton, TextInput, Toolbar, SaveButton, DeleteButton,
